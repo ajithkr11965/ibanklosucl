@@ -124,8 +124,8 @@ public class ProgramSaveImp implements VlSaveService {
                             vehicleLoanProgram.setLoanProgram(data.getValue());
                             if (data.getValue().equals("SURROGATE")) {
                                 vehicleLoanProgram.setAcctStmtMonths(bankService.getMisPRM("ACCT_STMT_MONTHS").getPVALUE());
-                            } else if (data.getValue().equals("70/30")) {
-                                vehicleLoanProgram.setDoctype("70/30");
+                            } else if (data.getValue().equals("60/40")) {
+                                vehicleLoanProgram.setDoctype("60/40");
                             }
                         }
                         break;
@@ -334,6 +334,7 @@ public class ProgramSaveImp implements VlSaveService {
                 }
                 fdAccountService.deleteAndSaveVehicleLoanFD(Long.valueOf(applicantId), wiNum, vehicleLoanFDList);
             }
+            // Note: 60/40 program files are handled via BPM upload in RestController
             // Update related entities
             if (vehicleLoanProgram.getLoanProgram().equals("INCOME") && "Y".equals(vehicleLoanProgram.getItrFlg()) && "R".equals(vehicleLoanProgram.getResidentType())) {
                 loanProgramIntegrationService.updateVehicleLoanITRWithProgram(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram);
@@ -413,7 +414,7 @@ public class ProgramSaveImp implements VlSaveService {
                 vehicleLoanProgramSalaryRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanProgramNriRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanFDRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
-            } else if (vehicleLoanProgram.getLoanProgram().equals("70/30")) {
+            } else if (vehicleLoanProgram.getLoanProgram().equals("60/40")) {
                 vehicleLoanProgram.setAvgSal(null);
                 vehicleLoanProgram.setAbb(null);
                 vehicleLoanProgram.setDepAmt(null);

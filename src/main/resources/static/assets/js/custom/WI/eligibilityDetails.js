@@ -287,7 +287,7 @@ $(document).ready(function () {
             $('#rm-recommended-roi').prop('readonly', true);
             $('#edit-amount-icon').hide();
             $('#edit-roi-icon').show();
-        } else if (eligloanProgram === "70/30" || eligloanProgram === "LOANFD") {
+        } else if (eligloanProgram === "60/40" || eligloanProgram === "LOANFD") {
             $('#rm-recommend-loan-amount').prop('readonly', true);
             $('#rm-recommended-roi').prop('readonly', true);
             $('#edit-amount-icon').show();
@@ -297,7 +297,7 @@ $(document).ready(function () {
 
     function handleEditAmount() {
         var loanProgram = eligibilityresp.loanProgram;
-        if (loanProgram === "70/30" || loanProgram === "LOANFD") {
+        if (loanProgram === "60/40" || loanProgram === "LOANFD") {
             $('#rm-recommend-loan-amount').prop('readonly', false).focus();
         }
     }
@@ -486,7 +486,7 @@ $(document).ready(function () {
         $('#modal-recommended-roi').prop('readonly', true);
         $('#modal-recommended-amount').val($('#rm-recommend-loan-amount').val());
         $('#modal-card-rate').val($('#card-rate').val());
-        if (loanProgram === "70/30" || loanProgram === "LOANFD") {
+        if (loanProgram === "60/40" || loanProgram === "LOANFD") {
             $('#roimodalrow').hide();
             $('#amtmodalrow').removeClass("col-md-6");
             $('#amtmodalrow').addClass("col-md-12");
@@ -750,7 +750,7 @@ $(document).ready(function () {
                     }
                 }
 
-                if (loanProgram === "70/30" || loanProgram === "LOANFD") {
+                if (loanProgram === "60/40" || loanProgram === "LOANFD") {
                     console.log("recommendedAmount=" + recommendedAmount + "----originalRecAmt=" + originalRecAmt);
                     if (recommendedAmount !== parseFloat(originalRecAmt)) {
                         confirmmsg("The Recommended Amount has been changed. Do you want to calculate the new EMI based on this ROI?")

@@ -361,13 +361,13 @@ public class VLBREservice {
                         amidata.put("applicantId", applicantid);
                         amidata.put("applicantType", applicanttype);
                         amidata.put("applicantName", vlbre.getApplname());
-                        if (!amitype.equalsIgnoreCase("70/30") && !amitype.equalsIgnoreCase("ITR") && !amitype.equalsIgnoreCase("ABB") && !amitype.equalsIgnoreCase("LOANFD"))
+                        if (!amitype.equalsIgnoreCase("60/40") && !amitype.equalsIgnoreCase("ITR") && !amitype.equalsIgnoreCase("ABB") && !amitype.equalsIgnoreCase("LOANFD"))
                             color = "amber";
                         else
                             color = "green";
                         amidata.put("color", color);
                         amidata.put("currentValue", amitype);
-                        amidata.put("masterValue", "ITR or ABB or LOANFD or 70/30");
+                        amidata.put("masterValue", "ITR or ABB or LOANFD or 60/40");
                         amberData.add(color);
                         amijsonarray.put(amidata);
                     }
@@ -862,7 +862,7 @@ public class VLBREservice {
                         .filter("SURROGATE"::equals)
                         .count();
                 long seventyThityCount = applicantsByProgram.keySet().stream()
-                        .filter("70/30"::equals)
+                        .filter("60/40"::equals)
                         .count();
                 long incomeConsideredCount = vlbreparams.stream()
                         .filter(program -> "Y".equals(program.getIncomeconsidered()))
@@ -981,33 +981,33 @@ public class VLBREservice {
                         .filter(program -> !"NONE".equals(program))
                         .findFirst());
                 log.info(" noneProgramsCount  : {}  ", noneProgramsCount);
-                /******************************************** 70/30 Check **********************************************/
+                /******************************************** 60/40 Check **********************************************/
                 boolean is7030Program = vlbreparams.stream()
-                        .anyMatch(applicant -> "70/30".equals(applicant.getLoanprogram()));
+                        .anyMatch(applicant -> "60/40".equals(applicant.getLoanprogram()));
 
 
                 if (is7030Program && seventyThityCount == 1) {
                     boolean is7030ProgramAndNoneEmployment = vlbreparams.stream()
-                            .anyMatch(applicant -> "NONE".equals(applicant.getEmptype()) && "70/30".equals(applicant.getLoanprogram()));
+                            .anyMatch(applicant -> "NONE".equals(applicant.getEmptype()) && "60/40".equals(applicant.getLoanprogram()));
                     if (is7030ProgramAndNoneEmployment) {
                         List<String> noneApplicantNames = vlbreparams.stream()
-                                .filter(applicant -> "NONE".equals(applicant.getEmptype()) && "70/30".equals(applicant.getLoanprogram()))
+                                .filter(applicant -> "NONE".equals(applicant.getEmptype()) && "60/40".equals(applicant.getLoanprogram()))
                                 .map(VLBREparams::getApplname).collect(Collectors.toList());
                         JSONObject generaljson = new JSONObject();
-                        generaljson.put("Desc", "Employment Type NONE should not be selected for 70/30 Program");
+                        generaljson.put("Desc", "Employment Type NONE should not be selected for 60/40 Program");
                         generaljson.put("color", "red");
                         generaljson.put("applicantName", noneApplicantNames);
                         generaljsonarray.put(generaljson);
                     }
                     boolean is7030ProgramAndNoCoapplicant = vlbreparams.stream()
-                            .anyMatch(applicant -> ("70/30".equals(applicant.getLoanprogram()) || "NONE".equals(applicant.getLoanprogram())) && ("G".equals(applicant.getApplicanttype()) || "C".equals(applicant.getApplicanttype())));
+                            .anyMatch(applicant -> ("60/40".equals(applicant.getLoanprogram()) || "NONE".equals(applicant.getLoanprogram())) && ("G".equals(applicant.getApplicanttype()) || "C".equals(applicant.getApplicanttype())));
 
                     if (!is7030ProgramAndNoCoapplicant) {
                         List<String> ApplicantNames = vlbreparams.stream()
-                                .filter(applicant -> "70/30".equals(applicant.getLoanprogram()))
+                                .filter(applicant -> "60/40".equals(applicant.getLoanprogram()))
                                 .map(VLBREparams::getApplname).collect(Collectors.toList());
                         JSONObject generaljson = new JSONObject();
-                        generaljson.put("Desc", "For 70/30 Program,Atleast One Co Applicant/Guarantor must be required ");
+                        generaljson.put("Desc", "For 60/40 Program,Atleast One Co Applicant/Guarantor must be required ");
                         generaljson.put("color", "red");
                         generaljson.put("applicantName", ApplicantNames);
                         generaljsonarray.put(generaljson);
@@ -1022,7 +1022,7 @@ public class VLBREservice {
                                         .filter(applicant -> ("C".equals(applicant.getApplicanttype()) || "G".equals(applicant.getApplicanttype())))
                                         .map(VLBREparams::getApplname).collect(Collectors.toList());
                                 JSONObject generaljson = new JSONObject();
-                                generaljson.put("Desc", "Spouse should be added as Co Applicant/Guarantor , if Applicant is Married in 70/30 Program. ");
+                                generaljson.put("Desc", "Spouse should be added as Co Applicant/Guarantor , if Applicant is Married in 60/40 Program. ");
                                 generaljson.put("color", "red");
                                 generaljson.put("applicantName", ApplicantNames);
                                 generaljsonarray.put(generaljson);
@@ -1035,7 +1035,7 @@ public class VLBREservice {
                                         .filter(applicant -> ("C".equals(applicant.getApplicanttype()) || "G".equals(applicant.getApplicanttype())) && "7".equals(applicant.getRelationwithapplicant()))
                                         .map(VLBREparams::getApplname).collect(Collectors.toList());
                                 JSONObject generaljson = new JSONObject();
-                                generaljson.put("Desc", "For UnMarried Applicant, Close Relatives only allowed in Co Applicant/Guarantor in 70/30 Program. (Others Option shouldn't be selected in Relationship with Applicant) ");
+                                generaljson.put("Desc", "For UnMarried Applicant, Close Relatives only allowed in Co Applicant/Guarantor in 60/40 Program. (Others Option shouldn't be selected in Relationship with Applicant) ");
                                 generaljson.put("color", "red");
                                 generaljson.put("applicantName", ApplicantNames);
                                 generaljsonarray.put(generaljson);
@@ -1130,7 +1130,7 @@ public class VLBREservice {
                 }
 
                 boolean isValidProgramAndNoneEmploymentwithIncomeConsidered = vlbreparams.stream()
-                        .anyMatch(applicant -> "NONE".equals(applicant.getEmptype()) && ("INCOME".equals(applicant.getLoanprogram()) || "70/30".equals(applicant.getLoanprogram()) || "SURROGATE".equals(applicant.getLoanprogram())) && "Y".equals(applicant.getIncomeconsidered()) );
+                        .anyMatch(applicant -> "NONE".equals(applicant.getEmptype()) && ("INCOME".equals(applicant.getLoanprogram()) || "60/40".equals(applicant.getLoanprogram()) || "SURROGATE".equals(applicant.getLoanprogram())) && "Y".equals(applicant.getIncomeconsidered()) );
                 if (isValidProgramAndNoneEmploymentwithIncomeConsidered) {
                     List<String> noneApplicantNames = vlbreparams.stream()
                             .filter(applicant -> "NONE".equals(applicant.getEmptype()) && !"NONE".equals(applicant.getLoanprogram()) && "Y".equals(applicant.getIncomeconsidered()) )
@@ -1635,8 +1635,8 @@ public class VLBREservice {
                     String emptype = vlbre.getEmptype();
                     Long score = vlbre.getBureauscore();
                     log.info("pgm  is   : {}   applicanttype  : {}   score  {}",pgm,applicanttype,score);
-                    if(pgm.equals("70/30")  && score >=700 && score<=739){
-                        /**************** New Changes for 70/30 no deleiquecy check for 700 to 739 Score ranges *************/
+                    if(pgm.equals("60/40")  && score >=700 && score<=739){
+                        /**************** New Changes for 60/40 no deleiquecy check for 700 to 739 Score ranges *************/
                         log.info("special Check criteria found");
                         Boolean statNew=false;
                         statNew = getDpdDaysStatFinal(applicantid, pgm, emptype, vlbre.getSlno(), vlbre.getWinum(), "BM");
@@ -1972,8 +1972,8 @@ public class VLBREservice {
             }
             if(!pgm.equals("LOANFD")) {
                 int durationNew = 0;
-                    if (pgm.equals("70/30"))
-                        durationNew = Integer.parseInt(iBankService.getMisPRM("70/30_BRE_DURATION").getPVALUE());
+                    if (pgm.equals("60/40"))
+                        durationNew = Integer.parseInt(iBankService.getMisPRM("60/40_BRE_DURATION").getPVALUE());
                     else if (pgm.equals("INCOME"))
                         durationNew = Integer.parseInt(iBankService.getMisPRM("INCOME_BRE_DURATION").getPVALUE());
                     else if (pgm.equals("SURROGATE"))
@@ -2216,8 +2216,8 @@ public class VLBREservice {
             JsonNode loss = rootNode.get("loss");
             JsonNode doubtful = rootNode.get("doubtful");
             int durationNew = 0;
-            if (pgm.equals("70/30"))
-                durationNew = Integer.parseInt(iBankService.getMisPRM("70/30_BRE_DURATION").getPVALUE());
+            if (pgm.equals("60/40"))
+                durationNew = Integer.parseInt(iBankService.getMisPRM("60/40_BRE_DURATION").getPVALUE());
             else if (pgm.equals("INCOME"))
                 durationNew = Integer.parseInt(iBankService.getMisPRM("INCOME_BRE_DURATION").getPVALUE());
             else if (pgm.equals("SURROGATE"))

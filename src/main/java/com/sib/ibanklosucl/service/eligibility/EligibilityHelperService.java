@@ -61,7 +61,7 @@ public class EligibilityHelperService {
             throw new ValidationException(ValidationError.ERRO02);
         }
         String loanProgram = vps.get(0).getLoanProgram();
-        if ("70/30".equals(loanProgram)) {
+        if ("60/40".equals(loanProgram)) {
             eligibleAmt = TotalLtv;
             //eligibleAmt = vehicleAmt.multiply(new BigDecimal("0.70"));
         } else if ("SURROGATE".equals(loanProgram)) {
@@ -144,9 +144,9 @@ public class EligibilityHelperService {
 //                            messages.add("Age Criteria not met for : " + program.getApplName() +" Age");
 //                        }
 
-                        //9.PROGRAM 70/30 Employment should not  be NONE
-                        if ("70/30".equals(programType) && "NONE".equals(program.getEmploymentType())) {
-                            messages.add("Employment Criteria not met for (PROGRAM 70/30) : " + program.getApplName() + " Age");
+                        //9.PROGRAM 60/40 Employment should not  be NONE
+                        if ("60/40".equals(programType) && "NONE".equals(program.getEmploymentType())) {
+                            messages.add("Employment Criteria not met for (PROGRAM 60/40) : " + program.getApplName() + " Age");
                         }
 
                         return messages.stream();
