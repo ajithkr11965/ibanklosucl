@@ -7,7 +7,6 @@ import com.sib.ibanklosucl.dto.TabResponse;
 import com.sib.ibanklosucl.model.*;
 import com.sib.ibanklosucl.repository.*;
 import com.sib.ibanklosucl.repository.program.*;
-import com.sib.ibanklosucl.repository.program.VehicleLoanProgramFileRepository;
 import com.sib.ibanklosucl.service.VehicleLoanProgramService;
 import com.sib.ibanklosucl.service.VlSaveService;
 import com.sib.ibanklosucl.service.iBankService;
@@ -61,8 +60,6 @@ public class ProgramSaveImp implements VlSaveService {
     private VehicleLoanFDRepository vehicleLoanFDRepository;
     @Autowired
     private EligibilityDetailsRepository eligibilityDetailsRepository;
-    @Autowired
-    private VehicleLoanProgramFileRepository vehicleLoanProgramFileRepository;
 
     @Override
     @Transactional
@@ -336,51 +333,8 @@ public class ProgramSaveImp implements VlSaveService {
                     }
                 }
                 fdAccountService.deleteAndSaveVehicleLoanFD(Long.valueOf(applicantId), wiNum, vehicleLoanFDList);
-            } else if (vehicleLoanProgram.getLoanProgram().equals("60/40")) {
-                // Handle 60/40 program file uploads from DOC_ARRAY
-                if ("Y".equals(request.getBody().getFileFlag()) &&
-                    request.getBody().getDOC_ARRAY() != null &&
-                    !request.getBody().getDOC_ARRAY().isEmpty()) {
-
-                    for (DOC_ARRAY doc : request.getBody().getDOC_ARRAY()) {
-                        try {
-                            // Decode base64 to bytes
-                            byte[] fileBytes = java.util.Base64.getDecoder().decode(doc.getDOC_BASE64());
-
-                            // Create file on disk
-                            String uploadDir = "uploads/program-files/" + wiNum + "/" + applicantId;
-                            java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
-                            java.nio.file.Files.createDirectories(uploadPath);
-
-                            String uniqueFilename = java.util.UUID.randomUUID().toString() + "." + doc.getDOC_EXT();
-                            java.nio.file.Path filePath = uploadPath.resolve(uniqueFilename);
-                            java.nio.file.Files.write(filePath, fileBytes);
-
-                            // Save metadata to database
-                            VehicleLoanProgramFile programFile = new VehicleLoanProgramFile();
-                            programFile.setWiNum(wiNum);
-                            programFile.setSlNo(Long.valueOf(slno));
-                            programFile.setApplicantId(Long.valueOf(applicantId));
-                            programFile.setProgramId(vehicleLoanProgram.getIno());
-                            programFile.setFileName(doc.getDOC_NAME());
-                            programFile.setFilePath(filePath.toString());
-                            programFile.setFileType(getContentType(doc.getDOC_EXT()));
-                            programFile.setFileSize((long) fileBytes.length);
-                            programFile.setUploadDate(new Date());
-                            programFile.setDelFlg("N");
-                            programFile.setCmUser(usd.getPPCNo());
-                            programFile.setCmDate(new Date());
-                            programFile.setReqIpAddr(CommonUtils.getIP(request.getReqip()));
-                            programFile.setHomeSol(usd.getSolid());
-
-                            vehicleLoanProgramFileRepository.save(programFile);
-                            log.info("60/40 Program file saved: {}", doc.getDOC_NAME());
-                        } catch (Exception e) {
-                            log.error("Error saving 60/40 program file: {}", doc.getDOC_NAME(), e);
-                        }
-                    }
-                }
             }
+            // Note: 60/40 program files are handled via BPM upload in RestController
             // Update related entities
             if (vehicleLoanProgram.getLoanProgram().equals("INCOME") && "Y".equals(vehicleLoanProgram.getItrFlg()) && "R".equals(vehicleLoanProgram.getResidentType())) {
                 loanProgramIntegrationService.updateVehicleLoanITRWithProgram(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram);
@@ -426,7 +380,6 @@ public class ProgramSaveImp implements VlSaveService {
                 vehicleLoanProgramSalaryRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanProgramNriRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanFDRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
-                vehicleLoanProgramFileRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
             } else if (vehicleLoanProgram.getLoanProgram().equals("NONE")) {
                 vehicleLoanProgram.setAbb(null);
                 vehicleLoanProgram.setDepAmt(null);
@@ -446,7 +399,6 @@ public class ProgramSaveImp implements VlSaveService {
                 vehicleLoanProgramNriRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanFDRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 itrAlertRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
-                vehicleLoanProgramFileRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
             } else if (vehicleLoanProgram.getLoanProgram().equals("SURROGATE")) {
                 vehicleLoanProgram.setAvgSal(null);
                 vehicleLoanProgram.setItrFlg(null);
@@ -462,7 +414,6 @@ public class ProgramSaveImp implements VlSaveService {
                 vehicleLoanProgramSalaryRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanProgramNriRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanFDRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
-                vehicleLoanProgramFileRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
             } else if (vehicleLoanProgram.getLoanProgram().equals("60/40")) {
                 vehicleLoanProgram.setAvgSal(null);
                 vehicleLoanProgram.setAbb(null);
@@ -481,7 +432,6 @@ public class ProgramSaveImp implements VlSaveService {
                 vehicleLoanProgramSalaryRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanProgramNriRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanFDRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
-                vehicleLoanProgramFileRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
             } else if (vehicleLoanProgram.getLoanProgram().equals("LOANFD")) {
                 vehicleLoanProgram.setAvgSal(null);
                 vehicleLoanProgram.setAbb(null);
@@ -498,7 +448,6 @@ public class ProgramSaveImp implements VlSaveService {
                 bsaDetailsRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanProgramSalaryRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
                 vehicleLoanProgramNriRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
-                vehicleLoanProgramFileRepository.deleteByApplicantIdAndWiNum(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum());
             }
         } else {
             log.info("old and new same program" + vehicleLoanProgram.getLoanProgram());
@@ -530,25 +479,5 @@ public class ProgramSaveImp implements VlSaveService {
     @Override
     public TabResponse fetchData(FormData request) {
         return new TabResponse();
-    }
-
-    /**
-     * Helper method to get content type from file extension
-     */
-    private String getContentType(String extension) {
-        if (extension == null) {
-            return "application/octet-stream";
-        }
-        switch (extension.toLowerCase()) {
-            case "pdf":
-                return "application/pdf";
-            case "jpg":
-            case "jpeg":
-                return "image/jpeg";
-            case "png":
-                return "image/png";
-            default:
-                return "application/octet-stream";
-        }
     }
 }
