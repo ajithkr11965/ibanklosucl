@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console Appender -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- =================================== -->
+    <!-- DEV ENVIRONMENT APPENDERS -->
+    <!-- =================================== -->
+
+    <!-- Dev Security Log Appender -->
+    <appender name="DEV_SECURITY" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>C:\\projectlogs\\ibanklosucl\\ibanklosucl-dev-security.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [SECURITY] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>C:\\projectlogs\\ibanklosucl\\ibanklosucl-dev-security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Dev Audit Log Appender -->
+    <appender name="DEV_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>C:\\projectlogs\\ibanklosucl\\ibanklosucl-dev-audit.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [AUDIT] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>C:\\projectlogs\\ibanklosucl\\ibanklosucl-dev-audit-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Dev Error Log Appender -->
+    <appender name="DEV_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>C:\\projectlogs\\ibanklosucl\\ibanklosucl-dev-error.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [ERROR] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>C:\\projectlogs\\ibanklosucl\\ibanklosucl-dev-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- Dev Application Log Appender -->
+    <appender name="DEV_APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>C:\\projectlogs\\ibanklosucl\\ibanklosucl-dev-application.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [APPLICATION] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>C:\\projectlogs\\ibanklosucl\\ibanklosucl-dev-application-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- =================================== -->
+    <!-- UAT ENVIRONMENT APPENDERS -->
+    <!-- =================================== -->
+
+    <!-- UAT Security Log Appender -->
+    <appender name="UAT_SECURITY" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-uat-security.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [SECURITY] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-uat-security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- UAT Audit Log Appender -->
+    <appender name="UAT_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-uat-audit.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [AUDIT] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-uat-audit-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- UAT Error Log Appender -->
+    <appender name="UAT_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-uat-error.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [ERROR] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-uat-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- UAT Application Log Appender -->
+    <appender name="UAT_APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-uat-application.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [APPLICATION] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-uat-application-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- =================================== -->
+    <!-- PROD ENVIRONMENT APPENDERS -->
+    <!-- =================================== -->
+
+    <!-- Prod Security Log Appender -->
+    <appender name="PROD_SECURITY" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-prod-security.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [SECURITY] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-prod-security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Prod Audit Log Appender -->
+    <appender name="PROD_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-prod-audit.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [AUDIT] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-prod-audit-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Prod Error Log Appender -->
+    <appender name="PROD_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-prod-error.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [ERROR] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-prod-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- Prod Application Log Appender -->
+    <appender name="PROD_APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-prod-application.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [APPLICATION] [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklosucl-prod-application-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Logger Configurations -->
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.springframework.transaction" level="WARN" />
+    <logger name="org.springframework.web.servlet.mvc" level="WARN" />
+
+    <!-- =================================== -->
+    <!-- PROFILE-SPECIFIC CONFIGURATIONS -->
+    <!-- =================================== -->
+
+    <!-- DEV Profile -->
+    <springProfile name="dev">
+        <logger name="SECURITY" level="INFO" additivity="false">
+            <appender-ref ref="DEV_SECURITY"/>
+        </logger>
+
+        <logger name="AUDIT" level="INFO" additivity="false">
+            <appender-ref ref="DEV_AUDIT"/>
+        </logger>
+
+        <root level="INFO">
+            <appender-ref ref="DEV_APPLICATION"/>
+            <appender-ref ref="DEV_ERROR"/>
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <!-- UAT Profile -->
+    <springProfile name="uat">
+        <logger name="SECURITY" level="INFO" additivity="false">
+            <appender-ref ref="UAT_SECURITY"/>
+        </logger>
+
+        <logger name="AUDIT" level="INFO" additivity="false">
+            <appender-ref ref="UAT_AUDIT"/>
+        </logger>
+
+        <root level="INFO">
+            <appender-ref ref="UAT_APPLICATION"/>
+            <appender-ref ref="UAT_ERROR"/>
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <!-- PROD Profile -->
+    <springProfile name="prod">
+        <logger name="SECURITY" level="INFO" additivity="false">
+            <appender-ref ref="PROD_SECURITY"/>
+        </logger>
+
+        <logger name="AUDIT" level="INFO" additivity="false">
+            <appender-ref ref="PROD_AUDIT"/>
+        </logger>
+
+        <root level="INFO">
+            <appender-ref ref="PROD_APPLICATION"/>
+            <appender-ref ref="PROD_ERROR"/>
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+</configuration>

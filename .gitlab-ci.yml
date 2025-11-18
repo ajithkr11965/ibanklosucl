@@ -1,0 +1,36 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  MAVEN_CLI_OPTS: "-DskipTests -P uat"
+  JAVA_HOME: "/tomcat/apps/jdk-17.0.1"
+  SHARED_DIR: "/tomcat/shared/builds"
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /UAT-PUSH/'
+
+build:
+  stage: build
+  script:
+    - echo "Setting up JAVA_HOME"
+    - export JAVA_HOME=/tomcat/apps/jdk-17.0.1
+    - export PATH=$JAVA_HOME/bin:$PATH
+    - echo "Building the project using Maven with the 'uat' profile"
+    - mvn clean package $MAVEN_CLI_OPTS
+    - echo "WAR file generated at target/"
+    - echo "Copying WAR files to the shared directory"
+    - mkdir -p $SHARED_DIR
+    - cp target/*.war $SHARED_DIR/
+  only:
+    - tags
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying the WAR file to the application server"
+    - chmod +x scp_deploy.sh
+    - ./scp_deploy.sh $SHARED_DIR/*.war
+  only:
+    - tags

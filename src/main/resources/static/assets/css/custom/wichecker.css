@@ -1,0 +1,277 @@
+.page-header-content{
+    background-image: url('../../images/header-keen-bg.png') !important;
+}
+body {
+    font-size: .85rem !important;
+}
+#vehList {
+    max-width: 2000px !important;
+}
+ .container {
+            margin-top: 20px;
+        }
+        .status-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .status-card.green {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-card.amber {
+            background-color: #ffc107;
+            color: white;
+        }
+        .status-card.red {
+            background-color: #9f3a38;
+            color: white;
+        }
+        .bre-details {
+            margin-top: 20px;
+        }
+        .bre-rule {
+            margin-bottom: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: all 0.3s ease-in-out;
+            background-color: white;
+        }
+        .bre-rule:hover {
+            background-color: #f1f1f1;
+        }
+        .bre-rule h4 {
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .bre-rule .rule-result {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .rule-result.green {
+            background-color: #28a745;
+            color: white;
+        }
+        .rule-result.amber {
+            background-color: #ffc107;
+            color: white;
+        }
+        .rule-detail {
+            display: none;
+            margin-top: 10px;
+        }
+        .rule-detail ul {
+            padding-left: 20px;
+        }
+        .toggle-icon {
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .bre-card-header {
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .bre-card-header:hover {
+            background-color: #0056b3;
+        }
+        .bre-card-body {
+            display: none;
+            animation: fadeIn 0.5s forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .swal2-popup {
+        font-size: 14px;
+    }
+    .dedup-error-message h3 {
+        font-size: 16px;
+        margin-bottom: 15px;
+        text-align: left;
+    }
+    .applicant-list {
+        list-style-type: none;
+        padding-left: 0;
+        text-align: left;
+        margin-bottom: 0;
+    }
+    .applicant-item {
+        margin-bottom: 10px;
+        position: relative;
+        padding-left: 20px;
+    }
+    .applicant-item::before {
+        content: '•';
+        position: absolute;
+        left: 0;
+        color: #000;
+    }
+    .applicant-name {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .pending-checks {
+        list-style-type: none;
+        padding-left: 20px;
+        margin-top: 5px;
+        margin-bottom: 0;
+    }
+    .pending-checks li {
+        position: relative;
+        padding-left: 15px;
+    }
+    .pending-checks li::before {
+        content: '○';
+        position: absolute;
+        left: 0;
+        color: #e74c3c;
+    }
+    .error-footer {
+        margin-top: 15px;
+        text-align: left;
+    }
+    .page-header-content{
+    background-image: url('../../images/header-keen-bg.png') !important;
+}
+/*.vehicleTab {*/
+/*    font-weight: 600 !important;*/
+/*    color: #663399FF !important;*/
+/*    background: #f2f2f2 !important;*/
+/*}*/
+.fs-7 {
+    font-size: .95rem !important;
+}
+.sidebar-content{
+    background-color: #F5F6FA !important;
+    border-top-left-radius: 1.75rem !important;
+    border-top-right-radius: 1.75rem !important;
+}
+.card{
+  //  background-color: #F5F6FA !important;
+}
+.sidebar{
+    border-radius: 1.75rem;
+  //  box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
+    box-shadow: rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(17, 17, 26, 0.1) 0px 0px 8px;
+}
+
+article{
+    border-bottom-right-radius: 1.75rem !important;
+    border-bottom-left-radius: 1.75rem !important;
+}
+.align-items-flex-start{
+    align-items : flex-start !important;
+}
+body{
+    background-color: #E6E6E6 !important;
+}
+/*.pict{*/
+/*    position: relative;overflow: hidden;border-radius: 12px;display: flex;align-items: center;justify-content: center;height: 100%;width: 100%;*/
+/*}*/
+/*input:read-only {*/
+/*    background-color: #f8f8f8;*/
+/*    color: #555;*/
+/*    border: 1px solid #ccc;*/
+/*    padding: 8px;*/
+/*    font-size: 16px;*/
+/*    font-family: Arial, sans-serif;*/
+/*}*/
+.bg-light-white{
+    background: #f9f8f8 !important;
+}
+.bg-light-whitetr td{
+    background: #f9f8f8 !important;
+}
+
+.split {
+    display: flex;
+    flex-direction: row;
+}
+
+.gutter {
+    background-color: #eee;
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+    cursor: col-resize;
+}
+
+.det{
+    display: none;
+}
+.kt {
+  font-size: .95rem !important;
+  font-weight: 400 !important;
+}
+.kt .form-control {
+  font-size: .95rem !important;
+  font-weight: 400 !important;
+}
+.kt .form-label {
+  font-size: .95rem !important;
+  font-weight: 400 !important;
+}
+.kt .col-form-label {
+  font-size: .95rem !important;
+}
+.kt .start-2 {
+  left:2%!important
+}
+
+.hideloader{
+    display: none;
+}
+.hide{
+    display: none;
+}
+.nav-link {
+    //background-color: #f1faff;
+    color: #009ef7;
+    border: none;
+    font-weight: 400;
+    font-size: smaller;
+}
+
+.nav-link:hover {
+
+    background-color: #2a47a4 !important;
+/ / background-color: #2247c9 !important;
+    color: white !important;
+    text-decoration: none;
+    font-weight: 900;
+    border: white;
+    border-radius: inherit;
+
+}
+
+.nav-link.active {
+
+    background-color: #2a47a4 !important;
+/ / background-color: #2247c9 !important;
+    color: white !important;
+    font-weight: 900;
+    border: white;
+    border-radius: inherit;
+
+
+}
+.acdlen{
+    width :700px;
+}

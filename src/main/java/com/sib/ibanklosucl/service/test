@@ -1,0 +1,11 @@
+mport com.sib.ibanklosucl.model.VehicleLoanMaster;
+import com.sib.ibanklosucl.model.VehicleLoanApplicant;
+import com.sib.ibanklosucl.model.VehicleLoanKyc;
+import com.sib.ibanklosucl.model.VehicleLoanBasic;
+import com.sib.ibanklosucl.model.VehicleLoanDetails;
+import com.sib.ibanklosucl.model.VehicleLoanVehicle;
+import com.sib.ibanklosucl.model.VLEmployment;
+import com.sib.ibanklosucl.model.VLEmploymentemp;
+import com.sib.ibanklosucl.model.VLEmploymentocc;
+import com.sib.ibanklosucl.model.EligibilityDetails;
+import com.sib.ibanklosucl.model.VehicleLoanProgram;

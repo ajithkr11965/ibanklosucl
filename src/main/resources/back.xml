@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- STDOUT Appender for Console Logging -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- UAT Rolling File Appender -->
+	<appender name="uatAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklos-uat.log</file>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklos-uat-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+	</appender>
+
+	<!-- Prod Rolling File Appender -->
+	<appender name="prodAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklos-prod.log</file>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/home/tomcat/apache-tomcat-9.0.89/logs/ibanklos-prod-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+	</appender>
+
+	<!-- Dev Rolling File Appender -->
+	<appender name="devAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>C:\\projectlogs\\ibanklos\\ibanklos-dev.log</file>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>C:\\projectlogs\\ibanklos\\ibanklos-dev-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+	</appender>
+
+	<!-- Logger Configurations -->
+	<logger name="org.springframework" level="WARN" />
+	<logger name="org.springframework.transaction" level="WARN" />
+	<logger name="org.springframework.web.servlet.mvc" level="WARN" />
+
+	<!-- Profile-specific configurations -->
+	<springProfile name="dev">
+		<root level="INFO">
+			<appender-ref ref="devAppender" />
+			<appender-ref ref="STDOUT" />
+		</root>
+	</springProfile>
+
+	<springProfile name="uat">
+		<root level="INFO">
+			<appender-ref ref="uatAppender" />
+			<appender-ref ref="STDOUT" />
+		</root>
+	</springProfile>
+
+	<springProfile name="prod">
+		<root level="INFO">
+			<appender-ref ref="prodAppender" />
+			<appender-ref ref="STDOUT" />
+		</root>
+	</springProfile>
+</configuration>
