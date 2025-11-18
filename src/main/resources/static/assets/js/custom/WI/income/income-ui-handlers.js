@@ -162,6 +162,70 @@ function updateIncomeDetails(programDetails, triggerElement) {
         form.find('.resident-check-section .alert')
             .removeClass('alert-info')
             .addClass('alert-warning');
+
+        // Populate NRI remittance data
+        if (programDetails.nriNetSalary != null) {
+            form.find('.monthly-salary-nr, [name="MonthSalary"]').val(programDetails.nriNetSalary);
+        }
+
+        if (programDetails.avgTotalRemittance != null) {
+            form.find('.avg-total-remittance, [name="Avgtotal_remittance"]').val(programDetails.avgTotalRemittance);
+        }
+
+        if (programDetails.avgNetRemittance != null) {
+            form.find('.avg-net-remittance, [name="Avgnet_remittance"]').val(programDetails.avgNetRemittance);
+            form.find('.calculated-monthly-gross-income').text(formatCurrency(programDetails.avgNetRemittance));
+            form.find('.monthly-gross-income-nr-hidden').val(programDetails.avgNetRemittance);
+        }
+
+        // Populate monthly remittance table from vehicleLoanProgramNRIList
+        if (programDetails.vehicleLoanProgramNRIList && programDetails.vehicleLoanProgramNRIList.length > 0) {
+            var nriList = programDetails.vehicleLoanProgramNRIList;
+
+            // Create a map of month-year to remittance data for quick lookup
+            var remittanceMap = {};
+            nriList.forEach(function(nri) {
+                if (nri.delFlg === 'N') {
+                    var key = nri.remitYear + '-' + String(nri.remitMonth).padStart(2, '0');
+                    remittanceMap[key] = {
+                        totalRemittance: nri.totRemittance || 0,
+                        bulkRemittance: nri.bulkRemittance || 0,
+                        netRemittance: nri.netRemittance || 0
+                    };
+                }
+            });
+
+            // Populate the remittance table rows
+            form.find('.remittance-row').each(function(index) {
+                var row = $(this);
+                var monthField = row.find('[name^="MonthSalary_mon"]');
+
+                if (monthField.length > 0) {
+                    var monthYear = monthField.val(); // Format should be "YYYY-MM" or similar
+
+                    if (remittanceMap[monthYear]) {
+                        var data = remittanceMap[monthYear];
+                        row.find('.total-remittance, [name^="total_remittance"]').val(data.totalRemittance);
+                        row.find('.bulk-remittance, [name^="bulk_remittance"]').val(data.bulkRemittance);
+                        row.find('.net-remittance, [name^="net_remittance"]').val(data.netRemittance);
+                    }
+                }
+            });
+
+            // Update the badge to show data is complete
+            var filledCount = nriList.filter(function(nri) { return nri.delFlg === 'N'; }).length;
+            if (filledCount === 12) {
+                form.find('.remittance-grid-header .badge')
+                    .removeClass('bg-warning')
+                    .addClass('bg-success')
+                    .text('Complete (12/12)');
+            } else {
+                form.find('.remittance-grid-header .badge')
+                    .removeClass('bg-success')
+                    .addClass('bg-warning')
+                    .text('Incomplete (' + filledCount + '/12)');
+            }
+        }
     } else {
         form.find('.non-resident-income-section').hide();
         form.find('.resident-income-sections').show();

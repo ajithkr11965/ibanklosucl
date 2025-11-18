@@ -132,6 +132,10 @@ public class VehicleLoanProgramService {
                 details.put("vehicleLoanITRList", program.getVehicleLoanITRList());
                 details.put("vehicleLoanProgramSalaryList", program.getVehicleLoanProgramSalaryList());
                 details.put("avgSal",program.getAvgSal());
+                // NRI-specific fields
+                details.put("nriNetSalary", program.getNriNetSalary());
+                details.put("avgTotalRemittance", program.getAvgTotalRemittance());
+                details.put("avgNetRemittance", program.getAvgNetRemittance());
                 break;
             case "SURROGATE":
                 details.put("vehicleLoanBSAList", program.getVehicleLoanBSAList());
