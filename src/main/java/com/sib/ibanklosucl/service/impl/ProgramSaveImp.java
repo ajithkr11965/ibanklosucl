@@ -189,13 +189,6 @@ public class ProgramSaveImp implements VlSaveService {
                             }
                         }
                          break;
-                         case "Avgbulk_remittance":
-                         if (vehicleLoanProgram.getLoanProgram().equals("INCOME") && (vehicleLoanProgram.getItrFlg() == null || "N".equals(vehicleLoanProgram.getItrFlg())) && ("N".equals(vehicleLoanProgram.getResidentType()))) {
-                             if (data.getValue() != null && !data.getValue().isEmpty()) {
-                                 vehicleLoanProgram.setAvgBulkRemittance(new BigDecimal(data.getValue()));
-                             }
-                         }
-                          break;
                          case "Avgnet_remittance":
                         if (vehicleLoanProgram.getLoanProgram().equals("INCOME") && (vehicleLoanProgram.getItrFlg() == null || "N".equals(vehicleLoanProgram.getItrFlg())) && ("N".equals(vehicleLoanProgram.getResidentType()))) {
                             if (data.getValue() != null && !data.getValue().isEmpty()) {

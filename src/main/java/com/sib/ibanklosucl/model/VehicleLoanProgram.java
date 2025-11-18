@@ -132,8 +132,6 @@ public class VehicleLoanProgram {
     private BigDecimal nriNetSalary;
 	@Column(name = "avg_total_remittance")
     private BigDecimal avgTotalRemittance;
-	@Column(name = "avg_bulk_remittance")
-    private BigDecimal avgBulkRemittance;
 	@Column(name = "avg_net_remittance")
     private BigDecimal avgNetRemittance;
 

@@ -1,5 +1,5 @@
 function calculateRemittances(detElement) {
-    const monthlySalary = parseFloat(detElement.find('.monthly-salary-nr').val()) || 0;
+    const monthlySalary = parseFloat(detElement.find('.monthly-salary-nr, [name="MonthSalary"]').val()) || 0;
     let totalRemittanceSum = 0;
     let netRemittanceSum = 0;
     let validMonthCount = 0;
@@ -27,9 +27,9 @@ function calculateRemittances(detElement) {
     // Calculate averages (divide by 12 for all months, not just valid ones)
     const avgTotalRemittance = totalRemittanceSum / 12;
     const avgNetRemittance = netRemittanceSum / 12;
-    // Update average fields
-    detElement.find('.avg-total-remittance').val(avgTotalRemittance.toFixed(2));
-    detElement.find('.avg-net-remittance').val(avgNetRemittance.toFixed(2));
+    // Update average fields (using both class and name selectors for compatibility)
+    detElement.find('.avg-total-remittance, [name="Avgtotal_remittance"]').val(avgTotalRemittance.toFixed(2));
+    detElement.find('.avg-net-remittance, [name="Avgnet_remittance"]').val(avgNetRemittance.toFixed(2));
     // Monthly Gross Income = Average of Net Remittance
     const monthlyGrossIncome = avgNetRemittance;
     // Update Monthly Gross Income display
