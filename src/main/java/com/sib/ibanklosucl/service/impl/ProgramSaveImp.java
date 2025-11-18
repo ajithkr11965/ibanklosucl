@@ -336,6 +336,50 @@ public class ProgramSaveImp implements VlSaveService {
                     }
                 }
                 fdAccountService.deleteAndSaveVehicleLoanFD(Long.valueOf(applicantId), wiNum, vehicleLoanFDList);
+            } else if (vehicleLoanProgram.getLoanProgram().equals("60/40")) {
+                // Handle 60/40 program file uploads from DOC_ARRAY
+                if ("Y".equals(request.getBody().getFileFlag()) &&
+                    request.getBody().getDOC_ARRAY() != null &&
+                    !request.getBody().getDOC_ARRAY().isEmpty()) {
+
+                    for (DOC_ARRAY doc : request.getBody().getDOC_ARRAY()) {
+                        try {
+                            // Decode base64 to bytes
+                            byte[] fileBytes = java.util.Base64.getDecoder().decode(doc.getDOC_BASE64());
+
+                            // Create file on disk
+                            String uploadDir = "uploads/program-files/" + wiNum + "/" + applicantId;
+                            java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
+                            java.nio.file.Files.createDirectories(uploadPath);
+
+                            String uniqueFilename = java.util.UUID.randomUUID().toString() + "." + doc.getDOC_EXT();
+                            java.nio.file.Path filePath = uploadPath.resolve(uniqueFilename);
+                            java.nio.file.Files.write(filePath, fileBytes);
+
+                            // Save metadata to database
+                            VehicleLoanProgramFile programFile = new VehicleLoanProgramFile();
+                            programFile.setWiNum(wiNum);
+                            programFile.setSlNo(Long.valueOf(slno));
+                            programFile.setApplicantId(Long.valueOf(applicantId));
+                            programFile.setProgramId(vehicleLoanProgram.getIno());
+                            programFile.setFileName(doc.getDOC_NAME());
+                            programFile.setFilePath(filePath.toString());
+                            programFile.setFileType(getContentType(doc.getDOC_EXT()));
+                            programFile.setFileSize((long) fileBytes.length);
+                            programFile.setUploadDate(new Date());
+                            programFile.setDelFlg("N");
+                            programFile.setCmUser(usd.getPPCNo());
+                            programFile.setCmDate(new Date());
+                            programFile.setReqIpAddr(CommonUtils.getIP(request.getReqip()));
+                            programFile.setHomeSol(usd.getSolid());
+
+                            vehicleLoanProgramFileRepository.save(programFile);
+                            log.info("60/40 Program file saved: {}", doc.getDOC_NAME());
+                        } catch (Exception e) {
+                            log.error("Error saving 60/40 program file: {}", doc.getDOC_NAME(), e);
+                        }
+                    }
+                }
             }
             // Update related entities
             if (vehicleLoanProgram.getLoanProgram().equals("INCOME") && "Y".equals(vehicleLoanProgram.getItrFlg()) && "R".equals(vehicleLoanProgram.getResidentType())) {
@@ -486,5 +530,25 @@ public class ProgramSaveImp implements VlSaveService {
     @Override
     public TabResponse fetchData(FormData request) {
         return new TabResponse();
+    }
+
+    /**
+     * Helper method to get content type from file extension
+     */
+    private String getContentType(String extension) {
+        if (extension == null) {
+            return "application/octet-stream";
+        }
+        switch (extension.toLowerCase()) {
+            case "pdf":
+                return "application/pdf";
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            default:
+                return "application/octet-stream";
+        }
     }
 }
