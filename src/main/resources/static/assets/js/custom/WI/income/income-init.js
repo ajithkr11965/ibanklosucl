@@ -65,6 +65,7 @@ $(document).ready(function () {
             $(this).closest('.det').find('.nonfoirdiv').hide();
             $(this).closest('.det').find('.imputeddiv').hide();
             $(this).closest('.det').find('.fddiv').hide();
+            $(this).closest('.det').find('.sixtyfortydiv').hide();
         }
     });
 
@@ -188,6 +189,7 @@ $(document).ready(function () {
                         $(this).closest('.det').find('.nonfoirdiv').hide();
                         $(this).closest('.det').find('.imputeddiv').hide();
                         $(this).closest('.det').find('.fddiv').hide();
+                        $(this).closest('.det').find('.sixtyfortydiv').hide();
 
                         //$(this).closest('.det').find('.rtrdiv').hide();
 
@@ -233,6 +235,8 @@ $(document).ready(function () {
                         } else if (selected === 'LOANFD') {
                             $(this).closest('.det').find('.fddiv').show();
                             handleFDProgramSelection($(this).closest('.det').find('.fddiv'));
+                        } else if (selected === '60/40') {
+                            $(this).closest('.det').find('.sixtyfortydiv').show();
                         }
                     }
                 });
