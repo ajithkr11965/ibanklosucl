@@ -46,6 +46,9 @@ public class VehicleLoanProgram {
     @OneToMany(mappedBy = "vlprogramSal", fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<VehicleLoanProgramSalary> vehicleLoanProgramSalaryList = new ArrayList<>();
+    @OneToMany(mappedBy = "vehicleLoanProgram", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<VehicleLoanProgramFile> vehicleLoanProgramFileList = new ArrayList<>();
 
 
     @Column(name = "WI_NUM", nullable = false)

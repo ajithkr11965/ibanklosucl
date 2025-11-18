@@ -182,8 +182,8 @@ public class ProgramConstraintService {
                 return "Imputed Income Program";
             case "LOANFD":
                 return "Loan FD Program";
-            case "70/30":
-                return "70/30 Program";
+            case "60/40":
+                return "60/40 Program";
             case "NONFOIR":
                 return "NON-FOIR Program";
             case "NONE":
