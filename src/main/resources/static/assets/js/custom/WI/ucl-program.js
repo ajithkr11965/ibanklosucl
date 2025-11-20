@@ -201,6 +201,31 @@ function validateFDProgram(detElement) {
         missingCifIds: getMissingCifIds(detElement)
     };
 }
+
+// Function to validate 60/40 Program
+function validate6040Program(form) {
+    var errors = [];
+
+    // Check if supporting document is uploaded
+    var doc6040File = form.find('.doc-6040-upload').val();
+    if (!doc6040File || doc6040File === '') {
+        errors.push("Please upload the supporting document for 60/40 program");
+        form.find('.doc-6040-upload').addClass('is-invalid');
+        return false;
+    }
+
+    // Validate file extension is PDF
+    var fileExtension = doc6040File.split('.').pop().toLowerCase();
+    if (fileExtension !== 'pdf') {
+        alertmsg('The supporting document must be a PDF file.');
+        form.find('.doc-6040-upload').addClass('is-invalid');
+        return false;
+    }
+
+    form.find('.doc-6040-upload').removeClass('is-invalid');
+    return errors.length === 0;
+}
+
 // Helper function to format currency
 function formatCurrency(amount) {
     return parseFloat(amount).toLocaleString('en-IN', {
@@ -561,6 +586,9 @@ function incomesave(form, key, callback) {
         case 'LOANFD':
             isValid = validateLoanFDProgram(form);
             break;
+        case '60/40':
+            isValid = validate6040Program(form);
+            break;
         case 'NONFOIR':
             isValid = validateNonFoirProgram(form);
             break;
@@ -591,6 +619,8 @@ function incomesave(form, key, callback) {
         processIncomeFiles(form, allFiles, promises);
     } else if (programCode === 'SURROGATE') {
         processSurrogateFiles(form, allFiles, promises);
+    } else if (programCode === '60/40') {
+        process6040Files(form, allFiles, promises);
     }
     var programCodeSelected = form.find('select[name="programCode"]').val();
     var itrFlgSelected = form.find('input[name="itravailable"]:checked').val();
@@ -873,6 +903,46 @@ function processSurrogateFiles(form, allFiles, promises) {
 // Implement SURROGATE-specific file processing
 }
 
+// Function to process 60/40 program files
+function process6040Files(form, allFiles, promises) {
+    form.find('.base64file').each(function () {
+        var input = $(this);
+        var files = input[0].files;
+        if (!files || files.length === 0) {
+            return; // Skip if no files selected
+        }
+
+        // Check if this file is relevant for 60/40 program
+        if (!input.hasClass('doc-6040-upload')) {
+            return; // Only process 60/40 program files
+        }
+
+        Array.from(files).forEach(function (file) {
+            var promise = new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var fileType = '60_40';
+
+                    console.log("Processing 60/40 file:", file.name, "Type:", fileType);
+                    var fileData = {
+                        DOC_EXT: file.name.split('.').pop(),
+                        DOC_NAME: fileType,
+                        DOC_BASE64: e.target.result.split(',')[1],
+                        reqtype: form.attr('data-code')
+                    };
+                    allFiles.push(fileData);
+                    resolve();
+                };
+
+                reader.onerror = function () {
+                    reject('Failed to read file: ' + file.name);
+                };
+                reader.readAsDataURL(file);
+            });
+            promises.push(promise);
+        });
+    });
+}
 
 function updateLIQUIDINCOME(programDetails, detElement) {
     console.log("UPDATE THE LIQUID INCOME PROGRAM");

@@ -137,8 +137,8 @@ public class VehicleLoanProgramService {
                 details.put("vehicleLoanBSAList", program.getVehicleLoanBSAList());
                 details.put("abb",program.getAbb());
                 break;
-            case "70/30":
-                // Add 70/30 specific details
+            case "60/40":
+                // Add 60/40 specific details
                 break;
             case "LOANFD":
                 Map<String, Object> fdAccountResponses = fdAccountService.getAccountDetails(program.getApplicantId(), program.getWiNum(),slNo);
