@@ -140,6 +140,25 @@ function updateFormWithProgramDetails(programDetails, triggerElement) {
             resetProgramFields(triggerElement);
             updateLIQUIDINCOME(programDetails, triggerElement);
             break;
+        case '60/40':
+            resetProgramFields(triggerElement);
+
+            // Show 60/40 div
+            form = triggerElement.closest('.det');
+            form.find('.sixtyfortydiv').show();
+
+            // Display file upload status if document was uploaded
+            if (programDetails.doctype === '60/40' || programDetails.loanProgram === '60/40') {
+                // Show indicator that document was previously uploaded to BPM
+                var statusDiv = form.find('.doc-6040-status');
+                if (statusDiv.length > 0) {
+                    statusDiv.html('<div class="alert alert-success mb-0"><i class="ph-check-circle me-2"></i><strong>Document Status:</strong> Previously uploaded to BPM system</div>');
+                    statusDiv.show();
+                }
+
+                console.log('60/40 program loaded - document was previously uploaded');
+            }
+            break;
     }
     //triggerElement.closest('.det').find('.programCode').val(selectedProgram).trigger('change');
     //$('#programCode').val(selectedProgram);
