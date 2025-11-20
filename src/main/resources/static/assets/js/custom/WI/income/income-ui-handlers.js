@@ -149,14 +149,15 @@ function updateFormWithProgramDetails(programDetails, triggerElement) {
 
             // Display file upload status if document was uploaded
             if (programDetails.doctype === '60/40' || programDetails.loanProgram === '60/40') {
-                // Show indicator that document was previously uploaded to BPM
-                var statusDiv = form.find('.doc-6040-status');
-                if (statusDiv.length > 0) {
-                    statusDiv.html('<div class="alert alert-success mb-0"><i class="ph-check-circle me-2"></i><strong>Document Status:</strong> Previously uploaded to BPM system</div>');
-                    statusDiv.show();
-                }
+                // Show "already uploaded" alert, hide info alert
+                form.find('.doc-6040-uploaded-alert').show();
+                form.find('.doc-6040-info-alert').hide();
 
-                console.log('60/40 program loaded - document was previously uploaded');
+                console.log('60/40 program loaded - document was previously uploaded to BPM');
+            } else {
+                // New entry - show info alert, hide uploaded alert
+                form.find('.doc-6040-uploaded-alert').hide();
+                form.find('.doc-6040-info-alert').show();
             }
             break;
     }
