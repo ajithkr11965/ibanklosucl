@@ -315,5 +315,25 @@ function resetProgramFields(triggerElement) {
             // Clear any imputed income response data
             form.find('.imputed-response-data').empty();
             break;
+
+        case '60/40':
+            // Reset 60/40 Program fields
+            // Clear file upload input
+            form.find('.doc-6040-upload').val('');
+
+            // Remove validation classes
+            form.find('.doc-6040-upload').removeClass('is-invalid is-valid');
+
+            // Hide and clear status displays
+            form.find('.doc-6040-status').hide();
+            form.find('.doc-6040-filename').text('');
+            form.find('.doc-6040-filesize').text('');
+
+            // Hide both alert sections (will be shown appropriately when section is displayed)
+            form.find('.doc-6040-uploaded-alert').hide();
+            form.find('.doc-6040-info-alert').hide();
+
+            console.log('60/40 program fields reset');
+            break;
     }
 }
