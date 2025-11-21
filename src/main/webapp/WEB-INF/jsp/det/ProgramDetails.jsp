@@ -212,6 +212,9 @@
 									</div>
 								</div>
 
+								<!-- Hidden field to indicate this is monthly salary based calculation -->
+								<input type="hidden" name="monthlyorabb" value="MonthSalary">
+
 								<!-- Monthly Salary Input -->
 								<div class="field-row mb-4">
 									<div class="field-group">

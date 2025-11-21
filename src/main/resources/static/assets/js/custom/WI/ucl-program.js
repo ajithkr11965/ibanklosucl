@@ -678,6 +678,13 @@ function incomesave(form, key, callback) {
             }
 
             // Transform remittance table data for VehicleLoanProgramNRI
+            // Backend expects data in specific order:
+            // 1. All MonthSalary_mon fields first (to create NRI objects)
+            // 2. Then all total_remittance fields
+            // 3. Then all bulk_remittance fields
+            // 4. Then all net_remittance fields
+
+            var remittanceData = [];
             form.find('.remittance-row').each(function(index) {
                 var row = $(this);
                 var monthYear = row.find('.remittance-month-year').val(); // Format: "2024-11"
@@ -690,14 +697,37 @@ function incomesave(form, key, callback) {
                     // Convert "2024-11" to "Nov-2024" format
                     var monthYearFormatted = convertToMonthYearFormat(monthYear);
 
-                    formDataArray.push({name: "MonthSalary_mon" + index, value: monthYearFormatted});
-                    formDataArray.push({name: "total_remittance" + index, value: totalRemittance});
-                    formDataArray.push({name: "bulk_remittance" + index, value: bulkRemittance});
-                    formDataArray.push({name: "net_remittance" + index, value: netRemittance});
+                    remittanceData.push({
+                        index: index,
+                        monthYear: monthYearFormatted,
+                        totalRemittance: totalRemittance,
+                        bulkRemittance: bulkRemittance,
+                        netRemittance: netRemittance
+                    });
                 }
             });
 
-            console.log("NRI remittance data transformation complete");
+            // Add all MonthSalary_mon fields first
+            remittanceData.forEach(function(data) {
+                formDataArray.push({name: "MonthSalary_mon" + data.index, value: data.monthYear});
+            });
+
+            // Then add all total_remittance fields
+            remittanceData.forEach(function(data) {
+                formDataArray.push({name: "total_remittance" + data.index, value: data.totalRemittance});
+            });
+
+            // Then add all bulk_remittance fields
+            remittanceData.forEach(function(data) {
+                formDataArray.push({name: "bulk_remittance" + data.index, value: data.bulkRemittance});
+            });
+
+            // Then add all net_remittance fields
+            remittanceData.forEach(function(data) {
+                formDataArray.push({name: "net_remittance" + data.index, value: data.netRemittance});
+            });
+
+            console.log("NRI remittance data transformation complete. Total rows:", remittanceData.length);
         }
         var addBacksField = form.find('.add-backs-obligations:visible');
         if (addBacksField.length > 0) {
