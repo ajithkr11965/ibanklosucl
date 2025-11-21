@@ -651,6 +651,54 @@ function incomesave(form, key, callback) {
                 }
             });
         }
+
+        // Handle NRI remittance data transformation for INCOME program
+        if (programCodeSelected === "INCOME" && resident_type === 'N') {
+            console.log("Transforming NRI remittance data for backend");
+
+            // Add monthly salary
+            var monthlySalary = form.find('.monthly-salary-nr').val();
+            if (monthlySalary) {
+                formDataArray.push({name: "MonthSalary", value: monthlySalary});
+            }
+
+            // Add average values for VehicleLoanProgram
+            var avgTotalRemittance = form.find('.avg-total-remittance').val();
+            var avgBulkRemittance = form.find('.avg-bulk-remittance').val() || '0';
+            var avgNetRemittance = form.find('.avg-net-remittance').val();
+
+            if (avgTotalRemittance) {
+                formDataArray.push({name: "Avgtotal_remittance", value: avgTotalRemittance});
+            }
+            if (avgBulkRemittance) {
+                formDataArray.push({name: "Avgbulk_remittance", value: avgBulkRemittance});
+            }
+            if (avgNetRemittance) {
+                formDataArray.push({name: "Avgnet_remittance", value: avgNetRemittance});
+            }
+
+            // Transform remittance table data for VehicleLoanProgramNRI
+            form.find('.remittance-row').each(function(index) {
+                var row = $(this);
+                var monthYear = row.find('.remittance-month-year').val(); // Format: "2024-11"
+                var totalRemittance = row.find('.total-remittance').val();
+                var bulkRemittance = row.find('.bulk-remittance').val() || '0';
+                var netRemittance = row.find('.net-remittance').val();
+
+                // Only include rows with data
+                if (totalRemittance && parseFloat(totalRemittance) > 0) {
+                    // Convert "2024-11" to "Nov-2024" format
+                    var monthYearFormatted = convertToMonthYearFormat(monthYear);
+
+                    formDataArray.push({name: "MonthSalary_mon" + index, value: monthYearFormatted});
+                    formDataArray.push({name: "total_remittance" + index, value: totalRemittance});
+                    formDataArray.push({name: "bulk_remittance" + index, value: bulkRemittance});
+                    formDataArray.push({name: "net_remittance" + index, value: netRemittance});
+                }
+            });
+
+            console.log("NRI remittance data transformation complete");
+        }
         var addBacksField = form.find('.add-backs-obligations:visible');
         if (addBacksField.length > 0) {
             formDataArray.push({name: "addBacksObligationsValue", value: addBacksField.val() || "0"});
@@ -976,6 +1024,19 @@ function updateLIQUIDINCOME(programDetails, detElement) {
 function getMonthName(monthNum) {
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months[parseInt(monthNum) - 1];
+}
+
+// Helper function to convert "2024-11" to "Nov-2024" format
+function convertToMonthYearFormat(yyyyMm) {
+    if (!yyyyMm) return '';
+    var parts = yyyyMm.split('-');
+    if (parts.length !== 2) return yyyyMm;
+
+    var year = parts[0];
+    var monthNum = parseInt(parts[1]);
+    var monthName = getMonthName(monthNum);
+
+    return monthName + '-' + year;
 }
 
 

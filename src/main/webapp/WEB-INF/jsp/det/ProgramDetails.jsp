@@ -262,7 +262,7 @@
 													int slNo = 1;
 													for (Map<String, String> month : remittanceMonths) {
 												%>
-												<tr class="remittance-row" data-month="<%=month.get("monthYearValue")%>">
+												<tr class="remittance-row" data-month="<%=month.get("monthYearValue")%>" data-row-index="<%=slNo-2%>">
 													<td class="text-center"><%=slNo++%>
 													</td>
 													<td class="fw-bold"><%=month.get("monthYear")%>
@@ -272,21 +272,25 @@
 														       class="form-control total-remittance"
 														       name="remittanceData[<%=slNo-2%>].totalRemittance"
 														       data-month="<%=month.get("monthYearValue")%>"
+														       data-row-index="<%=slNo-2%>"
 														       placeholder="0.00"
 														       step="0.01"
 														       min="0"
 														       value="<%=month.get("totalRemittance")%>">
 														<input type="hidden"
 														       name="remittanceData[<%=slNo-2%>].monthYear"
+														       class="remittance-month-year"
 														       value="<%=month.get("monthYearValue")%>">
 													</td>
 													<td>
 														<input type="number"
-														       class="form-control bulk-remittance bg-light"
+														       class="form-control bulk-remittance"
 														       name="remittanceData[<%=slNo-2%>].bulkRemittance"
 														       data-month="<%=month.get("monthYearValue")%>"
+														       data-row-index="<%=slNo-2%>"
 														       placeholder="0.00"
-														       readonly
+														       step="0.01"
+														       min="0"
 														       value="<%=month.get("bulkRemittance")%>">
 													</td>
 													<td>
@@ -294,6 +298,7 @@
 														       class="form-control net-remittance bg-light"
 														       name="remittanceData[<%=slNo-2%>].netRemittance"
 														       data-month="<%=month.get("monthYearValue")%>"
+														       data-row-index="<%=slNo-2%>"
 														       placeholder="0.00"
 														       readonly
 														       value="<%=month.get("netRemittance")%>">
