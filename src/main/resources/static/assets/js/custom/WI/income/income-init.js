@@ -343,6 +343,7 @@ $(document).ready(function () {
         var ino = $(this).data('ino');
         var row = $(this).closest('tr');
         var $fdResponse = $(this).closest('.fdResponse');
+        var detElement = $(this).closest('.det');
 
         // Confirm deletion
         Swal.fire({
