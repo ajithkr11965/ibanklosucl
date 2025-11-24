@@ -162,6 +162,46 @@ function updateIncomeDetails(programDetails, triggerElement) {
         form.find('.resident-check-section .alert')
             .removeClass('alert-info')
             .addClass('alert-warning');
+
+        // Load NRI remittance details if available
+        if (programDetails.nriRemittanceDetails) {
+            console.log("Loading NRI remittance details from saved data");
+
+            // Load monthly salary
+            if (programDetails.nriRemittanceDetails.monthlySalary) {
+                form.find('.monthly-salary-nr').val(programDetails.nriRemittanceDetails.monthlySalary);
+            }
+
+            // Load averages
+            if (programDetails.nriRemittanceDetails.avgTotalRemittance) {
+                form.find('.avg-total-remittance').val(programDetails.nriRemittanceDetails.avgTotalRemittance);
+            }
+            if (programDetails.nriRemittanceDetails.avgBulkRemittance) {
+                form.find('.avg-bulk-remittance').val(programDetails.nriRemittanceDetails.avgBulkRemittance);
+            }
+            if (programDetails.nriRemittanceDetails.avgNetRemittance) {
+                form.find('.avg-net-remittance').val(programDetails.nriRemittanceDetails.avgNetRemittance);
+
+                // Update calculated monthly gross income
+                form.find('.calculated-monthly-gross-income').text(programDetails.nriRemittanceDetails.avgNetRemittance);
+                form.find('.monthly-gross-income-nr-hidden').val(programDetails.nriRemittanceDetails.avgNetRemittance);
+            }
+
+            // Load 12 months remittance data
+            if (programDetails.nriRemittanceDetails.remittanceMonths &&
+                programDetails.nriRemittanceDetails.remittanceMonths.length > 0) {
+
+                programDetails.nriRemittanceDetails.remittanceMonths.forEach(function(monthData) {
+                    // Find the row with matching month
+                    var row = form.find('.remittance-row[data-month="' + monthData.monthYear + '"]');
+                    if (row.length > 0) {
+                        row.find('.total-remittance').val(monthData.totalRemittance || '');
+                        row.find('.bulk-remittance').val(monthData.bulkRemittance || '');
+                        row.find('.net-remittance').val(monthData.netRemittance || '');
+                    }
+                });
+            }
+        }
     } else {
         form.find('.non-resident-income-section').hide();
         form.find('.resident-income-sections').show();

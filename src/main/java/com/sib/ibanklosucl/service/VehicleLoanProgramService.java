@@ -3,6 +3,7 @@ package com.sib.ibanklosucl.service;
 import com.sib.ibanklosucl.dto.AnnualIncomeAndBankBalance;
 import com.sib.ibanklosucl.model.VehicleLoanBSA;
 import com.sib.ibanklosucl.model.VehicleLoanProgram;
+import com.sib.ibanklosucl.model.VehicleLoanProgramNRI;
 import com.sib.ibanklosucl.repository.VehicleLoanProgramRepository;
 import com.sib.ibanklosucl.repository.program.BSADetailsRepository;
 import com.sib.ibanklosucl.service.vlsr.FDAccountService;
@@ -132,6 +133,36 @@ public class VehicleLoanProgramService {
                 details.put("vehicleLoanITRList", program.getVehicleLoanITRList());
                 details.put("vehicleLoanProgramSalaryList", program.getVehicleLoanProgramSalaryList());
                 details.put("avgSal",program.getAvgSal());
+
+                // Add NRI remittance details if resident type is NRI
+                if ("N".equals(program.getResidentType())) {
+                    Map<String, Object> nriRemittanceDetails = new HashMap<>();
+
+                    // Add monthly salary and averages
+                    nriRemittanceDetails.put("monthlySalary", program.getNriNetSalary());
+                    nriRemittanceDetails.put("avgTotalRemittance", program.getAvgTotalRemittance());
+                    nriRemittanceDetails.put("avgBulkRemittance", program.getAvgBulkRemittance());
+                    nriRemittanceDetails.put("avgNetRemittance", program.getAvgNetRemittance());
+
+                    // Format remittance months data for JavaScript
+                    if (program.getVlnriList() != null && !program.getVlnriList().isEmpty()) {
+                        List<Map<String, Object>> remittanceMonths = new ArrayList<>();
+                        for (VehicleLoanProgramNRI nri : program.getVlnriList()) {
+                            if ("N".equals(nri.getDelFlg())) {
+                                Map<String, Object> monthData = new HashMap<>();
+                                // Format as "yyyy-MM" to match JSP format
+                                monthData.put("monthYear", String.format("%d-%02d", nri.getRemitYear(), nri.getRemitMonth()));
+                                monthData.put("totalRemittance", nri.getTotRemittance());
+                                monthData.put("bulkRemittance", nri.getBulkRemittance());
+                                monthData.put("netRemittance", nri.getNetRemittance());
+                                remittanceMonths.add(monthData);
+                            }
+                        }
+                        nriRemittanceDetails.put("remittanceMonths", remittanceMonths);
+                    }
+
+                    details.put("nriRemittanceDetails", nriRemittanceDetails);
+                }
                 break;
             case "SURROGATE":
                 details.put("vehicleLoanBSAList", program.getVehicleLoanBSAList());
