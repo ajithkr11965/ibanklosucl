@@ -53,20 +53,13 @@ function updateFormWithProgramDetails(programDetails, triggerElement) {
             form = triggerElement.closest('.det');
             form.find('.fddiv').show();
 
-            // If FD details are saved, restore them
-            if (programDetails.fdDetails) {
-                // Restore FD account selections if saved
-                if (programDetails.fdDetails.selectedAccounts) {
-                    //updateFDAccountsFromSavedData(programDetails.fdDetails, form);
-                }
+            console.log("Loading LOANFD program details from database");
 
-                // If FD accounts were already fetched, show them
-                if (programDetails.fdDetails.accountsFetched === 'Y') {
-                    // Trigger the FD fetch to reload accounts
-                    setTimeout(function() {
-                        form.find('.fd-account-validate').trigger('click');
-                    }, 300);
-                }
+            // If FD details are saved in database, restore them
+            if (programDetails.vehicleLoanFDList) {
+                updateFDDetailsFromDatabase(programDetails, triggerElement);
+            } else {
+                console.log("No saved FD data found");
             }
             break;
             case 'NONFOIR':
@@ -1500,5 +1493,131 @@ function refreshFDDetailsForAllApplicants() {
             }
         }
     });
+}
+
+/**
+ * Update FD details from database when page loads
+ * This populates the FD table with previously saved FD data
+ */
+function updateFDDetailsFromDatabase(programDetails, detElement) {
+    console.log("========== Populating FD Details from Database ==========");
+
+    var fdData = programDetails.vehicleLoanFDList;
+    var depAmt = programDetails.depAmt;
+
+    console.log("FD Data:", fdData);
+    console.log("Deposit Amount:", depAmt);
+
+    // Check if we have FD accounts
+    if (!fdData || !fdData.fdAccounts || fdData.fdAccounts.length === 0) {
+        console.log("No FD accounts found in database");
+        detElement.find('.fdDetailsDiv').hide();
+        detElement.find('.no-fd-message').show();
+        return;
+    }
+
+    var fdAccounts = fdData.fdAccounts;
+    var missingCifIds = fdData.missingCifIds || [];
+
+    console.log("Number of FD accounts: " + fdAccounts.length);
+    console.log("Missing CIF IDs: " + missingCifIds);
+
+    // Build the FD table HTML
+    var tableHtml = '<table class="table table-bordered table-hover">';
+    tableHtml += '<thead class="table-light">';
+    tableHtml += '<tr>';
+    tableHtml += '<th>FD A/C</th>';
+    tableHtml += '<th>Account Status</th>';
+    tableHtml += '<th>Account Type</th>';
+    tableHtml += '<th>CIF IDs</th>';
+    tableHtml += '<th>Account Open Date</th>';
+    tableHtml += '<th>Maturity Date</th>';
+    tableHtml += '<th>Deposit Amount (₹)</th>';
+    tableHtml += '<th>Deposit Available (₹)</th>';
+    tableHtml += '<th>FSLD Adj (₹)</th>';
+    tableHtml += '<th>Available Balance (₹)</th>';
+    tableHtml += '<th>Eligible</th>';
+    tableHtml += '<th>Action</th>';
+    tableHtml += '</tr>';
+    tableHtml += '</thead>';
+    tableHtml += '<tbody>';
+
+    var totalavailBalance = 0;
+    var eligibleCount = 0;
+
+    fdAccounts.forEach(function (accountResponse) {
+        if (accountResponse.eligible) {
+            var account = accountResponse.vehicleLoanFD;
+            var rowClass = accountResponse.eligible ? '' : 'text-muted';
+            var cifIds = account.cifid || '';
+
+            tableHtml += '<tr class="' + rowClass + '">';
+            tableHtml += '<td><strong>' + account.fdaccnum + '</strong></td>';
+            tableHtml += '<td>' + account.fdStatus + '</td>';
+            tableHtml += '<td>' + account.singleJoint + '</td>';
+            tableHtml += '<td>';
+            if (cifIds) {
+                var cifArray = cifIds.split(',');
+                cifArray.forEach(function(cif) {
+                    var trimmedCif = cif.trim();
+                    // Highlight missing CIF IDs in red
+                    var badgeClass = missingCifIds.includes(trimmedCif) ? 'bg-danger' : 'bg-info';
+                    tableHtml += '<span class="badge ' + badgeClass + ' me-1 mb-1">' + trimmedCif + '</span>';
+                });
+            }
+            tableHtml += '</td>';
+            tableHtml += '<td>' + formatDate(account.accountOpenDate) + '</td>';
+            tableHtml += '<td>' + formatDate(account.maturityDate) + '</td>';
+            tableHtml += '<td class="text-end">' + formatCurrency(account.depositAmount) + '</td>';
+            tableHtml += '<td class="text-end">' + formatCurrency(account.fdBalAmount) + '</td>';
+            tableHtml += '<td class="text-end">' + formatCurrency(account.fsldAdjAmount) + '</td>';
+            tableHtml += '<td class="text-end"><strong>' + formatCurrency(account.availbalance) + '</strong></td>';
+
+            if (accountResponse.eligible) {
+                tableHtml += '<td><span class="badge bg-success">Yes</span></td>';
+                tableHtml += '<td><button type="button" class="btn btn-danger btn-sm delete-fd-btn" data-ino="' + account.ino + '">';
+                tableHtml += '<i class="ph-trash me-1"></i>Delete</button></td>';
+                eligibleCount++;
+                totalavailBalance += account.availbalance;
+            } else {
+                tableHtml += '<td><span class="badge bg-secondary">No</span></td>';
+                tableHtml += '<td>-</td>';
+            }
+
+            tableHtml += '</tr>';
+        }
+    });
+
+    tableHtml += '</tbody>';
+    tableHtml += '</table>';
+
+    // Update table
+    detElement.find('.fdResponse').empty().html(tableHtml);
+
+    // Show FD details div
+    detElement.find('.fdDetailsDiv').show();
+    detElement.find('.no-fd-message').hide();
+
+    // Update total available balance
+    detElement.find('.totalavailBalance').val(totalavailBalance);
+    detElement.find('.totalavailBalance-display').text(formatCurrency(totalavailBalance));
+
+    // Update summary cards
+    detElement.find('.fd-count').text(fdAccounts.length);
+    detElement.find('.fd-eligible-count').text(eligibleCount);
+    detElement.find('.fd-loan-eligibility').text(formatCurrency(totalavailBalance));
+
+    // Display missing CIF IDs if any
+    if (missingCifIds && missingCifIds.length > 0) {
+        displayMissingCifIds(detElement, missingCifIds);
+    } else {
+        // Hide missing CIF alert if no missing IDs
+        detElement.find('.missing-cif-alert-section').hide();
+    }
+
+    console.log("=== FD Details Loaded Successfully ===");
+    console.log("Total FDs: " + fdAccounts.length);
+    console.log("Eligible FDs: " + eligibleCount);
+    console.log("Total Available Balance: ₹" + totalavailBalance.toFixed(2));
 }
 
