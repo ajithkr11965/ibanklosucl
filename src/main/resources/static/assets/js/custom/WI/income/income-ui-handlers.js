@@ -1423,3 +1423,61 @@ $(document).ready(function() {
     });
 });
 
+// Update total balance for FD accounts
+function updateTotalBalance($fdResponse) {
+    let totalBalance = 0;
+    let fdcount = 0;
+    let eligibleCount = 0;
+
+    $fdResponse.find('tbody tr').each(function () {
+        fdcount = fdcount + 1;
+        let availableBalance = parseFloat($(this).find('td').eq(8).text().replace(/,/g, ''));
+        let eligibleTxt = $(this).find('td').eq(9).text().trim();
+
+        if (!isNaN(availableBalance) && eligibleTxt === "Yes") {
+            totalBalance += availableBalance;
+            eligibleCount++;
+        }
+    });
+
+    console.log("Total FDs: " + fdcount + ", Eligible: " + eligibleCount + ", Total Balance: " + totalBalance);
+
+    // Update the total available balance field in the current section
+    $fdResponse.closest('.fdDetailsDiv').find('.totalavailBalance').val(totalBalance.toFixed(2));
+    $fdResponse.closest('.fdDetailsDiv').find('.totalavailBalance-display').text(formatCurrencyINR(totalBalance));
+
+    // Update the summary cards
+    $fdResponse.closest('.fdDetailsDiv').find('.fd-count').text(fdcount);
+    $fdResponse.closest('.fdDetailsDiv').find('.fd-eligible-count').text(eligibleCount);
+    $fdResponse.closest('.fdDetailsDiv').find('.fd-loan-eligibility').text(formatCurrencyINR(totalBalance));
+}
+
+// Refresh FD details for all applicants (to recalculate eligibility)
+function refreshFDDetailsForAllApplicants() {
+    console.log("========== Refreshing FD Details for All Applicants ==========");
+
+    $('#loanbody .tab-pane').each(function () {
+        var $tabPane = $(this);
+        var cifId = $tabPane.find('.generaldetails').find('.custID').val();
+
+        console.log("Checking applicant with CIF: " + cifId);
+
+        // Only refresh if customer ID exists and is valid (9 digits)
+        if (cifId != null && cifId.length === 9) {
+            var $fdButton = $tabPane.find('.fd-account-validate');
+
+            // Only refresh if FD program is selected
+            var selectedProgram = $tabPane.find('.programCode').val();
+
+            if (selectedProgram === 'LOANFD' && $fdButton.length > 0) {
+                console.log("Refreshing FD details for CIF: " + cifId);
+
+                // Small delay to avoid overwhelming the server
+                setTimeout(function() {
+                    $fdButton.trigger('click');
+                }, 300);
+            }
+        }
+    });
+}
+
