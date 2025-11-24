@@ -69,7 +69,7 @@ $(document).ready(function () {
     $('.fdResponse').each(function () {
         updateTotalBalance($(this));
     });
-    $('#loanbody').on('click', '.delete-btn', function () {
+    $('#loanbody').on('click', '.delete-fd-btn', function () {
         var ino = $(this).data('ino');
         var row = $(this).closest('tr');
         let $fdResponse = $(this).closest('.fdResponse');
