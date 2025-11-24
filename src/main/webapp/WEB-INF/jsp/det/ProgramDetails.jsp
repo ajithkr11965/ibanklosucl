@@ -14,6 +14,9 @@
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="com.sib.ibanklosucl.model.VehicleLoanFD" %>
+<%@ page import="com.sib.ibanklosucl.model.VehicleLoanProgramNRI" %>
+<%@ page import="java.time.format.TextStyle" %>
+<%@ page import="java.util.Locale" %>
 <%
 	String datamode = (String) request.getAttribute("datamod");
 	String apptype = (String) request.getAttribute("apptype");
@@ -47,12 +50,13 @@
 	BigDecimal totalavailBalance = BigDecimal.ZERO;
 	String monthlySalary = "";
 	BigDecimal avgTotalRemittance = BigDecimal.ZERO;
+	BigDecimal avgBulkRemittance = BigDecimal.ZERO;
 	BigDecimal avgNetRemittance = BigDecimal.ZERO;
 	List<Map<String, String>> remittanceMonths = new ArrayList<>();
 	LocalDate currentDate = LocalDate.now();
 	YearMonth currentYearMonth = YearMonth.from(currentDate);
 
-	// Start from 12 months ago
+	// Start from 12 months ago - create template for 12 months
 	for (int i = 11; i >= 0; i--) {
 		YearMonth month = currentYearMonth.minusMonths(i);
 		Map<String, String> monthData = new HashMap<>();
@@ -88,7 +92,49 @@
 					//liquidIncome = hlProgram.getLiquidMonthlyIncome().toPlainString();
 					liquidUploadStatus = "uploaded";
 				}
-				//
+
+				// Load NRI remittance data if program is INCOME and resident is NRI
+				if ("INCOME".equals(hidProgramCode) && "N".equals(residentialStatus)) {
+					// Load monthly salary
+					if (hlProgram.getNriNetSalary() != null) {
+						monthlySalary = hlProgram.getNriNetSalary().toPlainString();
+					}
+
+					// Load averages
+					if (hlProgram.getAvgTotalRemittance() != null) {
+						avgTotalRemittance = hlProgram.getAvgTotalRemittance();
+					}
+					if (hlProgram.getAvgBulkRemittance() != null) {
+						avgBulkRemittance = hlProgram.getAvgBulkRemittance();
+					}
+					if (hlProgram.getAvgNetRemittance() != null) {
+						avgNetRemittance = hlProgram.getAvgNetRemittance();
+					}
+
+					// Load remittance details from VehicleLoanProgramNRI
+					if (hlProgram.getVlnriList() != null && !hlProgram.getVlnriList().isEmpty()) {
+						// Create a map of saved remittance data by month/year for easy lookup
+						Map<String, VehicleLoanProgramNRI> savedRemittanceMap = new HashMap<>();
+						for (VehicleLoanProgramNRI nri : hlProgram.getVlnriList()) {
+							if ("N".equals(nri.getDelFlg())) {
+								// Create key in "yyyy-MM" format for matching
+								String key = String.format("%d-%02d", nri.getRemitYear(), nri.getRemitMonth());
+								savedRemittanceMap.put(key, nri);
+							}
+						}
+
+						// Populate the remittanceMonths list with saved data
+						for (Map<String, String> monthData : remittanceMonths) {
+							String monthYearValue = monthData.get("monthYearValue"); // "2024-11"
+							VehicleLoanProgramNRI savedNri = savedRemittanceMap.get(monthYearValue);
+							if (savedNri != null) {
+								monthData.put("totalRemittance", savedNri.getTotRemittance() != null ? String.valueOf(savedNri.getTotRemittance()) : "");
+								monthData.put("bulkRemittance", savedNri.getBulkRemittance() != null ? String.valueOf(savedNri.getBulkRemittance()) : "");
+								monthData.put("netRemittance", savedNri.getNetRemittance() != null ? String.valueOf(savedNri.getNetRemittance()) : "");
+							}
+						}
+					}
+				}
 			}
 
 		}
@@ -212,6 +258,9 @@
 									</div>
 								</div>
 
+								<!-- Hidden field to indicate this is monthly salary based calculation -->
+								<input type="hidden" name="monthlyorabb" value="MonthSalary">
+
 								<!-- Monthly Salary Input -->
 								<div class="field-row mb-4">
 									<div class="field-group">
@@ -262,7 +311,7 @@
 													int slNo = 1;
 													for (Map<String, String> month : remittanceMonths) {
 												%>
-												<tr class="remittance-row" data-month="<%=month.get("monthYearValue")%>">
+												<tr class="remittance-row" data-month="<%=month.get("monthYearValue")%>" data-row-index="<%=slNo-2%>">
 													<td class="text-center"><%=slNo++%>
 													</td>
 													<td class="fw-bold"><%=month.get("monthYear")%>
@@ -272,21 +321,25 @@
 														       class="form-control total-remittance"
 														       name="remittanceData[<%=slNo-2%>].totalRemittance"
 														       data-month="<%=month.get("monthYearValue")%>"
+														       data-row-index="<%=slNo-2%>"
 														       placeholder="0.00"
 														       step="0.01"
 														       min="0"
 														       value="<%=month.get("totalRemittance")%>">
 														<input type="hidden"
 														       name="remittanceData[<%=slNo-2%>].monthYear"
+														       class="remittance-month-year"
 														       value="<%=month.get("monthYearValue")%>">
 													</td>
 													<td>
 														<input type="number"
-														       class="form-control bulk-remittance bg-light"
+														       class="form-control bulk-remittance"
 														       name="remittanceData[<%=slNo-2%>].bulkRemittance"
 														       data-month="<%=month.get("monthYearValue")%>"
+														       data-row-index="<%=slNo-2%>"
 														       placeholder="0.00"
-														       readonly
+														       step="0.01"
+														       min="0"
 														       value="<%=month.get("bulkRemittance")%>">
 													</td>
 													<td>
@@ -294,6 +347,7 @@
 														       class="form-control net-remittance bg-light"
 														       name="remittanceData[<%=slNo-2%>].netRemittance"
 														       data-month="<%=month.get("monthYearValue")%>"
+														       data-row-index="<%=slNo-2%>"
 														       placeholder="0.00"
 														       readonly
 														       value="<%=month.get("netRemittance")%>">
@@ -313,7 +367,13 @@
 														       readonly
 														       value="<%=avgTotalRemittance%>">
 													</td>
-													<td colspan="1"></td>
+													<td>
+														<input type="text"
+														       class="form-control avg-bulk-remittance bg-light fw-bold"
+														       name="avgBulkRemittance"
+														       readonly
+														       value="<%=avgBulkRemittance%>">
+													</td>
 													<td>
 														<input type="text"
 														       class="form-control avg-net-remittance bg-light fw-bold"
@@ -339,12 +399,12 @@
 										</div>
 										<div class="text-end">
 											<h4 class="mb-0 text-success fw-bold">
-												<i class="ph-currency-inr fs-6"></i> <span class="calculated-monthly-gross-income"><%=monthlyGrossIncome%></span>
+												<i class="ph-currency-inr fs-6"></i> <span class="calculated-monthly-gross-income"><%=avgNetRemittance%></span>
 											</h4>
 											<input type="hidden"
 											       name="monthlyGrossIncomeNR"
 											       class="monthly-gross-income-nr-hidden"
-											       value="<%=monthlyGrossIncome%>">
+											       value="<%=avgNetRemittance%>">
 										</div>
 									</div>
 								</div>
