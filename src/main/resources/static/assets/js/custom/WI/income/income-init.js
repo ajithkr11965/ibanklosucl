@@ -369,18 +369,19 @@ $(document).ready(function () {
                         // Remove row from table
                         row.remove();
 
-                        // Update total balance
+                        // Recalculate total balance based on remaining visible rows
                         updateTotalBalance($fdResponse);
 
-                        // Refresh FD details for all applicants to recalculate eligibility
-                        refreshFDDetailsForAllApplicants();
+                        // Update row count
+                        var remainingRows = $fdResponse.find('tbody tr').length;
+                        detElement.find('.fd-count').text(remainingRows);
 
                         hideLoader();
 
                         Swal.fire({
                             icon: 'success',
                             title: 'Deleted!',
-                            text: 'FD account has been removed.',
+                            text: 'FD account has been removed. Eligibility recalculated.',
                             timer: 2000,
                             showConfirmButton: false
                         });

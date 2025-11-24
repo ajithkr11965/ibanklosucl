@@ -1452,9 +1452,22 @@ function updateTotalBalance($fdResponse) {
     $fdResponse.closest('.fdDetailsDiv').find('.fd-loan-eligibility').text(formatCurrencyINR(totalBalance));
 }
 
-// Refresh FD details for all applicants (to recalculate eligibility)
+/**
+ * Refresh FD details for all applicants by re-fetching from Finacle
+ *
+ * WARNING: This function triggers a FULL re-fetch from Finacle which:
+ * 1. Marks ALL existing FD records as deleted in DB
+ * 2. Fetches fresh data from Finacle
+ * 3. Creates new FD records
+ *
+ * DO NOT use this after delete operations as it will bring back deleted FDs!
+ * The delete operation already recalculates eligibility on the backend.
+ *
+ * Use only when you need to sync with latest Finacle data (e.g., initial fetch, manual refresh)
+ */
 function refreshFDDetailsForAllApplicants() {
     console.log("========== Refreshing FD Details for All Applicants ==========");
+    console.warn("WARNING: This will re-fetch all FDs from Finacle!");
 
     $('#loanbody .tab-pane').each(function () {
         var $tabPane = $(this);
