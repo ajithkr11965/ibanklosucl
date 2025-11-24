@@ -1431,8 +1431,16 @@ function updateTotalBalance($fdResponse) {
 
     $fdResponse.find('tbody tr').each(function () {
         fdcount = fdcount + 1;
-        let availableBalance = parseFloat($(this).find('td').eq(8).text().replace(/,/g, ''));
-        let eligibleTxt = $(this).find('td').eq(9).text().trim();
+
+        // Column 9 is Available Balance in the JavaScript-generated table
+        // (Column 8 has FSLD Adj, Column 9 has Available Balance)
+        let availableBalanceText = $(this).find('td').eq(9).text().trim();
+        let availableBalance = parseFloat(availableBalanceText.replace(/,/g, ''));
+
+        // Column 10 is Eligible status
+        let eligibleTxt = $(this).find('td').eq(10).text().trim();
+
+        console.log("Row " + fdcount + ": Available Balance = '" + availableBalanceText + "' (" + availableBalance + "), Eligible = '" + eligibleTxt + "'");
 
         if (!isNaN(availableBalance) && eligibleTxt === "Yes") {
             totalBalance += availableBalance;
