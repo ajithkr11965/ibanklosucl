@@ -166,7 +166,7 @@ public class ProgramSaveImp implements VlSaveService {
                     case "form16available":
                         vehicleLoanProgram.setForm16Flg(data.getValue());
                         break;
-                    case "AvgIncome":
+                    case "avgMonthlyIncome":
                         if (vehicleLoanProgram.getLoanProgram().equals("INCOME") && (vehicleLoanProgram.getItrFlg() == null || "N".equals(vehicleLoanProgram.getItrFlg())) && ("R".equals(vehicleLoanProgram.getResidentType()))) {
                             if (data.getValue() != null && !data.getValue().isEmpty()) {
                                 vehicleLoanProgram.setAvgSal(new BigDecimal(data.getValue()));
@@ -247,8 +247,12 @@ public class ProgramSaveImp implements VlSaveService {
                     }
                     vehicleLoanProgramSalaryRepository.saveAll(existingEntries);
                     List<VehicleLoanProgramSalary> vehicleLoanProgramSalaryList = new ArrayList<>();
+                    Map<Integer, VehicleLoanProgramSalary> payslipMap = new HashMap<>();
+
+                    // First pass: Create payslip objects and populate month/year
                     for (DataItem data : request.getBody().getData()) {
-                        if (data.getKey().startsWith("sal_month")) {
+                        if (data.getKey().startsWith("payslip-month")) {
+                            int index = Integer.parseInt(data.getKey().replace("payslip-month", ""));
                             VehicleLoanProgramSalary vehicleLoanProgramSalary = new VehicleLoanProgramSalary();
                             vehicleLoanProgramSalary.setWiNum(wiNum);
                             vehicleLoanProgramSalary.setSlno(Long.valueOf(slno));
@@ -261,9 +265,21 @@ public class ProgramSaveImp implements VlSaveService {
                             vehicleLoanProgramSalary.setLastModDate(new Date());
                             vehicleLoanProgramSalary.setHomeSol(usd.getSolid());
                             vehicleLoanProgramSalary.setVlprogramSal(vehicleLoanProgram);
-                            vehicleLoanProgramSalaryList.add(vehicleLoanProgramSalary);
+                            payslipMap.put(index, vehicleLoanProgramSalary);
+                        } else if (data.getKey().startsWith("payslip-year")) {
+                            int index = Integer.parseInt(data.getKey().replace("payslip-year", ""));
+                            if (payslipMap.containsKey(index) && data.getValue() != null && !data.getValue().isEmpty()) {
+                                payslipMap.get(index).setSalYear(Integer.valueOf(data.getValue()));
+                            }
+                        } else if (data.getKey().startsWith("payslip-amount")) {
+                            int index = Integer.parseInt(data.getKey().replace("payslip-amount", ""));
+                            if (payslipMap.containsKey(index) && data.getValue() != null && !data.getValue().isEmpty()) {
+                                payslipMap.get(index).setSalAmount(new BigDecimal(data.getValue()));
+                            }
                         }
                     }
+
+                    vehicleLoanProgramSalaryList.addAll(payslipMap.values());
                     loanProgramIntegrationService.deleteAndSaveVehicleLoanProgramSalary(Long.valueOf(applicantId), wiNum, vehicleLoanProgramSalaryList);
                 } else if ((vehicleLoanProgram.getItrFlg() == null || "N".equals(vehicleLoanProgram.getItrFlg())) && "N".equals(vehicleLoanProgram.getResidentType()) && "MONTHLY".equals(vehicleLoanProgram.getDoctype())) {
                     List<VehicleLoanProgramNRI> existingEntries = vehicleLoanProgramNriRepository.findByApplicantIdAndWiNumAndDelFlg(vehicleLoanProgram.getApplicantId(), vehicleLoanProgram.getWiNum(), "N");

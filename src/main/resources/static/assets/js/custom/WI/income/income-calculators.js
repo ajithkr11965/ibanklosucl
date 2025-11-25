@@ -49,38 +49,7 @@ function calculateRemittances(detElement) {
     }
 }
 
-function calculateFinalAMI(element) {
-    var form = element.closest('.field-row').parent();
-    var monthlyGrossField = form.find('.itr-monthly-gross, [name="itrMonthlyGross"], [name="pensionerMonthlyGross"], [name="sepSenpMonthlyGross"], [name="agriculturistMonthlyGross"], .form16-monthly-income, .avg-monthly-income');
-
-    if (monthlyGrossField.length === 0) {
-        // Try to find in previous sibling
-        monthlyGrossField = element.closest('.field-row').prev().find('.itr-monthly-gross, [name="itrMonthlyGross"], [name="pensionerMonthlyGross"], [name="sepSenpMonthlyGross"], [name="agriculturistMonthlyGross"], .form16-monthly-income, .avg-monthly-income');
-    }
-
-    if (monthlyGrossField.length === 0) {
-        console.error("Monthly gross income field not found");
-        return;
-    }
-
-    // Get the monthly gross income value
-    var monthlyGrossIncome = parseFloat(monthlyGrossField.val().replace(/,/g, '')) || 0;
-    var addBacksObligations = parseFloat(element.val()) || 0;
-
-    // Calculate final AMI
-    var finalAMI = monthlyGrossIncome + addBacksObligations;
-
-    // Find and update the final AMI field
-    var finalAMIField = form.find('.final-ami');
-    if (finalAMIField.length === 0) {
-        // Try to find in next sibling
-        finalAMIField = element.closest('.field-row').next().find('.final-ami');
-    }
-
-    if (finalAMIField.length > 0) {
-        finalAMIField.val(finalAMI.toFixed(2));
-    }
-}
+// calculateFinalAMI function has been removed as Final AMI is now equal to Average Monthly Income
 
 function calculateTotalIncome(triggerElement) {
     var tableBody = (triggerElement.is('tbody')) ?

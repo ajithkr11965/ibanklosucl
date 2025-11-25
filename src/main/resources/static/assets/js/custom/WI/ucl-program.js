@@ -729,11 +729,7 @@ function incomesave(form, key, callback) {
 
             console.log("NRI remittance data transformation complete. Total rows:", remittanceData.length);
         }
-        var addBacksField = form.find('.add-backs-obligations:visible');
-        if (addBacksField.length > 0) {
-            formDataArray.push({name: "addBacksObligationsValue", value: addBacksField.val() || "0"});
-            formDataArray.push({name: "finalEligibilityAMI", value: form.find('.final-ami:visible').val() || "0"});
-        }
+        // Add backs/obligations and Final AMI have been removed - Average Monthly Income is now the final income
 
         var data = formDataArray.map(function (item) {
             return {key: item.name, value: item.value}; // Transform to key-value pair objects

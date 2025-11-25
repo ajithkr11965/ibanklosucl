@@ -162,6 +162,22 @@ function validateIncomeProgram(form) {
                         alertmsg("At least one payslip is required.");
                         isValid = false;
                     }
+
+                    var payslipDates = [];
+                    var now = new Date();
+                    var currentMonth = now.getMonth(); // 0-based (0 = January, 11 = December)
+                    var currentYear = now.getFullYear();
+
+                    // Calculate last 3 months
+                    var last3Months = [];
+                    for (var i = 1; i <= 3; i++) {
+                        var tempDate = new Date(currentYear, currentMonth - i, 1);
+                        last3Months.push({
+                            month: tempDate.getMonth() + 1, // Convert to 1-based
+                            year: tempDate.getFullYear()
+                        });
+                    }
+
                     // Validate each payslip row
                     payslipRows.each(function () {
                         var row = $(this);
@@ -189,7 +205,47 @@ function validateIncomeProgram(form) {
                             fileInput.addClass('is-invalid');
                             isValid = false;
                         }
+
+                        // Store payslip date for validation
+                        if (month && year) {
+                            payslipDates.push({
+                                month: parseInt(month),
+                                year: parseInt(year)
+                            });
+                        }
                     });
+
+                    // Validate that all payslips are from the last 3 months
+                    if (payslipDates.length > 0 && isValid) {
+                        var invalidPayslips = [];
+                        payslipDates.forEach(function(payslipDate, index) {
+                            var isValidMonth = last3Months.some(function(validMonth) {
+                                return validMonth.month === payslipDate.month && validMonth.year === payslipDate.year;
+                            });
+
+                            if (!isValidMonth) {
+                                invalidPayslips.push(index);
+                            }
+                        });
+
+                        if (invalidPayslips.length > 0) {
+                            var lastMonthNames = last3Months.map(function(m) {
+                                var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                                  'July', 'August', 'September', 'October', 'November', 'December'];
+                                return monthNames[m.month - 1] + ' ' + m.year;
+                            });
+                            alertmsg("All payslips must be from the last 3 months: " + lastMonthNames.join(', '));
+
+                            // Mark invalid rows
+                            invalidPayslips.forEach(function(idx) {
+                                payslipRows.eq(idx).find('.payslip-month, .payslip-year').addClass('is-invalid');
+                            });
+
+                            logValidationError("INCOME", "payslip-last-3-months", "", "Payslips not from last 3 months");
+                            isValid = false;
+                        }
+                    }
+
                     // Check total income
                     var totalIncome = parseFloat(form.find('.total-income').val());
                     if (isNaN(totalIncome) || totalIncome <= 0) {
@@ -255,41 +311,7 @@ function validateIncomeProgram(form) {
         }
     } // Income Resident validation ends here
 
-    var finalAMI = form.find('.final-ami:visible').val();
-    if (finalAMI === undefined || finalAMI === null || finalAMI === '') {
-        // If monthly gross income and add backs are valid but final AMI is missing, try to calculate it
-        var monthlyGrossIncome = null;
-        // Find the appropriate monthly gross income field based on employment type and document type
-        if(residentialStatus==="R") {
-            if (employmentType === 'SALARIED') {
-                var docTypeSelection = form.find('input[name="docTypeSelection"]:checked').val();
-                if (docTypeSelection === 'ITR') {
-                    monthlyGrossIncome = parseFloat(form.find('.itr-monthly-gross').val() || '0');
-                } else if (docTypeSelection === 'PAYSLIP') {
-                    monthlyGrossIncome = parseFloat(form.find('.avg-monthly-income').val() || '0');
-                }
-            } else if (employmentType === 'PENSIONER') {
-                monthlyGrossIncome = parseFloat(form.find('input[name="pensionerMonthlyGross"]').val() || '0');
-            } else if (employmentType === 'SEP' || employmentType === 'SENP') {
-                monthlyGrossIncome = parseFloat(form.find('input[name="sepSenpMonthlyGross"]').val() || '0');
-            } else if (employmentType === 'AGRICULTURIST') {
-                monthlyGrossIncome = parseFloat(form.find('input[name="agriculturistMonthlyGross"]').val() || '0');
-            }
-        } else if (residentialStatus==="N") {
-            monthlyGrossIncome = avgNetRemittance;
-        }
-
-        if (monthlyGrossIncome !== null && !isNaN(monthlyGrossIncome)) {
-            // Calculate final AMI
-            var calculatedFinalAMI = monthlyGrossIncome ;
-            form.find('.final-ami:visible').val(calculatedFinalAMI.toFixed(2));
-            console.log("Final AMI calculated automatically:", calculatedFinalAMI.toFixed(2));
-        } else {
-            form.find('.final-ami:visible').addClass('is-invalid');
-            logValidationError("INCOME", "final-ami", "", "Final Monthly Income for Eligibility is missing");
-            isValid = false;
-        }
-    }
+    // Final AMI validation removed - Final AMI is now equal to Average Monthly Income
 
     if (!isValid) {
         alertmsg("Please fill in all required fields before saving.");
