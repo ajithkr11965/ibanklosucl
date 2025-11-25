@@ -15,6 +15,7 @@ function logValidationError(programType, fieldName, fieldValue, errorMessage) {
 function validateIncomeProgram(form) {
     var isValid = true;
     var validationErrors = [];
+    var hasShownAlert = false; // Track if we've shown a specific alert message
 
     console.log("=== VALIDATING INCOME PROGRAM ===");
 
@@ -160,6 +161,7 @@ function validateIncomeProgram(form) {
                     // Check if at least one payslip row exists
                     if (payslipRows.length === 0) {
                         alertmsg("At least one payslip is required.");
+                        hasShownAlert = true;
                         isValid = false;
                     }
 
@@ -235,6 +237,7 @@ function validateIncomeProgram(form) {
                                 return monthNames[m.month - 1] + ' ' + m.year;
                             });
                             alertmsg("All payslips must be from the last 3 months: " + lastMonthNames.join(', '));
+                            hasShownAlert = true; // Mark that we've shown a specific alert
 
                             // Mark invalid rows
                             invalidPayslips.forEach(function(idx) {
@@ -314,7 +317,10 @@ function validateIncomeProgram(form) {
     // Final AMI validation removed - Final AMI is now equal to Average Monthly Income
 
     if (!isValid) {
-        alertmsg("Please fill in all required fields before saving.");
+        // Only show generic message if we haven't shown a specific alert
+        if (!hasShownAlert) {
+            alertmsg("Please fill in all required fields before saving.");
+        }
         console.log("=== INCOME PROGRAM VALIDATION FAILED ===");
     } else {
         console.log("=== INCOME PROGRAM VALIDATION PASSED ===");
