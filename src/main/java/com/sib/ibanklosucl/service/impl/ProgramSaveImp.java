@@ -271,6 +271,11 @@ public class ProgramSaveImp implements VlSaveService {
                             if (payslipMap.containsKey(index) && data.getValue() != null && !data.getValue().isEmpty()) {
                                 payslipMap.get(index).setSalYear(Integer.valueOf(data.getValue()));
                             }
+                        } else if (data.getKey().startsWith("payslip-gross-amount")) {
+                            int index = Integer.parseInt(data.getKey().replace("payslip-gross-amount", ""));
+                            if (payslipMap.containsKey(index) && data.getValue() != null && !data.getValue().isEmpty()) {
+                                payslipMap.get(index).setSalGrossAmount(new BigDecimal(data.getValue()));
+                            }
                         } else if (data.getKey().startsWith("payslip-amount")) {
                             int index = Integer.parseInt(data.getKey().replace("payslip-amount", ""));
                             if (payslipMap.containsKey(index) && data.getValue() != null && !data.getValue().isEmpty()) {

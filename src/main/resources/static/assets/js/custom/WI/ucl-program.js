@@ -638,6 +638,7 @@ function incomesave(form, key, callback) {
                 var row = $(this);
                 var month = row.find('.payslip-month').val();
                 var year = row.find('.payslip-year').val();
+                var grossAmount = row.find('.payslip-gross-amount').val();
                 var amount = row.find('.payslip-amount').val();
                 var payslipId = row.data('payslip-id') || '';
 
@@ -646,6 +647,9 @@ function incomesave(form, key, callback) {
                     formDataArray.push({name: "payslip-id" + index, value: payslipId});
                     formDataArray.push({name: "payslip-month" + index, value: month});
                     formDataArray.push({name: "payslip-year" + index, value: year});
+                    if (grossAmount) {
+                        formDataArray.push({name: "payslip-gross-amount" + index, value: grossAmount});
+                    }
                     formDataArray.push({name: "payslip-amount" + index, value: amount});
                     formDataArray.push({name: "payslip-uploaded" + index, value: row.find('.payslip-file-status').val() === 'uploaded' ? 'Y' : 'N'});
                 }

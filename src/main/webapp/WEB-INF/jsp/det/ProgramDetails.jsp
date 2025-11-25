@@ -499,7 +499,8 @@
 														<th>Month</th>
 														<th>Year</th>
 														<th>Payslip File</th>
-														<th>Amount (<i class="ph-currency-inr fs-6"></i>)</th>
+														<th>Gross Salary (<i class="ph-currency-inr fs-6"></i>)</th>
+														<th>Net Salary (<i class="ph-currency-inr fs-6"></i>)</th>
 														<th>Action</th>
 													</tr>
 												</thead>

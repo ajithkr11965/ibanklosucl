@@ -185,6 +185,7 @@ function validateIncomeProgram(form) {
                         var row = $(this);
                         var month = row.find('.payslip-month').val();
                         var year = row.find('.payslip-year').val();
+                        var grossAmount = row.find('.payslip-gross-amount').val();
                         var amount = row.find('.payslip-amount').val();
                         var fileInput = row.find('.payslip-file');
                         var fileStatus = row.find('.payslip-file-status').val();
@@ -201,6 +202,17 @@ function validateIncomeProgram(form) {
                         if (!amount || parseFloat(amount) <= 0) {
                             row.find('.payslip-amount').addClass('is-invalid');
                             isValid = false;
+                        }
+                        // Validate gross amount if provided - it should be >= net amount
+                        if (grossAmount && parseFloat(grossAmount) > 0) {
+                            if (amount && parseFloat(grossAmount) < parseFloat(amount)) {
+                                row.find('.payslip-gross-amount').addClass('is-invalid');
+                                if (!hasShownAlert) {
+                                    alertmsg("Gross salary cannot be less than net salary");
+                                    hasShownAlert = true;
+                                }
+                                isValid = false;
+                            }
                         }
                         // Only require file upload for new payslip entries (no payslip-id)
                         if (!hasFile && !row.data('payslip-id')) {

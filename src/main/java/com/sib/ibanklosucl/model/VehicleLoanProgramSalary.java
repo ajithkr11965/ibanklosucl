@@ -47,6 +47,9 @@ public class VehicleLoanProgramSalary {
     @Column(name = "SAL_AMOUNT")
     private java.math.BigDecimal salAmount;
 
+    @Column(name = "SAL_GROSS_AMOUNT")
+    private java.math.BigDecimal salGrossAmount;
+
     @Column(name = "SALARY_DOC")
     private String salaryDoc;
 
