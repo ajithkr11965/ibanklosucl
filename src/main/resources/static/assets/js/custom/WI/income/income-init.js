@@ -334,6 +334,75 @@ $(document).ready(function () {
         console.log("========== Fetching FD Details ==========");
         fetchFDDetails($(this));
     });
+
+    // Delete FD account button handler
+    $('#loanbody').on('click', '.delete-fd-btn', function (e) {
+        e.preventDefault();
+        console.log("========== Delete FD Account ==========");
+
+        var ino = $(this).data('ino');
+        var row = $(this).closest('tr');
+        var $fdResponse = $(this).closest('.fdResponse');
+        var detElement = $(this).closest('.det');
+
+        // Confirm deletion
+        Swal.fire({
+            title: 'Delete FD Account?',
+            text: 'Are you sure you want to remove this FD account from the program?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showLoader();
+
+                $.ajax({
+                    url: 'api/deleteFDAccount',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ino: ino}),
+                    success: function (response) {
+                        console.log("FD account deleted successfully");
+
+                        // Remove row from table
+                        row.remove();
+
+                        // Recalculate total balance based on remaining visible rows
+                        updateTotalBalance($fdResponse);
+
+                        // Update row count
+                        var remainingRows = $fdResponse.find('tbody tr').length;
+                        detElement.find('.fd-count').text(remainingRows);
+
+                        hideLoader();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: 'FD account has been removed. Eligibility recalculated.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error deleting FD account:', error);
+                        hideLoader();
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Delete Failed',
+                            text: xhr.responseText || 'Failed to delete FD account. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            }
+        });
+    });
+
     $('#loanbody').on('click', '.calculate-imputed-income, .recalculate-imputed', function () {
         console.log("========== Calculating Imputed Income ==========");
         calculateImputedIncome($(this));

@@ -570,6 +570,98 @@ function validateLoanFDProgram(form) {
     form.find('.is-invalid').removeClass('is-invalid');
 
     // Check if at least one FD entry exists in the table
+    // The new implementation uses .fdResponse tbody tr
+    var fdRows = form.find('.fdResponse tbody tr');
+
+    if (fdRows.length === 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'No FD Accounts',
+            text: 'Please fetch FD details first. At least one Fixed Deposit (FD) account is required for the LOANFD program.',
+            confirmButtonText: 'OK'
+        });
+        logValidationError("LOANFD", "fd-rows", "0", "No FD entries found");
+        isValid = false;
+        console.log("=== LOANFD PROGRAM VALIDATION FAILED: No FD entries ===");
+        return isValid;
+    }
+
+    console.log("Number of FD entries in table: " + fdRows.length);
+
+    // Get total available balance from the field
+    var totalAvailableBalance = form.find('.totalavailBalance').val();
+
+    console.log("Total Available Balance: " + totalAvailableBalance);
+
+    // Validate that total available balance is not null/empty and > 0
+    if (!totalAvailableBalance || totalAvailableBalance.trim() === '' || isNaN(parseFloat(totalAvailableBalance))) {
+        form.find('.totalavailBalance').addClass('is-invalid');
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Total Balance',
+            text: 'Total Available Balance is missing or invalid. Please fetch FD details.',
+            confirmButtonText: 'OK'
+        });
+        logValidationError("LOANFD", "totalavailBalance", totalAvailableBalance, "Total available balance is null or not a number");
+        isValid = false;
+        console.log("=== LOANFD PROGRAM VALIDATION FAILED: Invalid total balance ===");
+        return isValid;
+    }
+
+    var totalBalance = parseFloat(totalAvailableBalance);
+
+    if (totalBalance <= 0) {
+        form.find('.totalavailBalance').addClass('is-invalid');
+        Swal.fire({
+            icon: 'error',
+            title: 'Insufficient Balance',
+            text: 'Total Available Balance must be greater than zero. Current balance: ₹' + totalBalance.toFixed(2),
+            confirmButtonText: 'OK'
+        });
+        logValidationError("LOANFD", "totalavailBalance", totalBalance, "Total available balance is zero or negative");
+        isValid = false;
+        console.log("=== LOANFD PROGRAM VALIDATION FAILED: Balance <= 0 ===");
+        return isValid;
+    }
+
+    // Check if there's at least one eligible FD
+    var eligibleCount = 0;
+    fdRows.each(function () {
+        var eligibleBadge = $(this).find('td').eq(10).text().trim();
+        if (eligibleBadge === 'Yes') {
+            eligibleCount++;
+        }
+    });
+
+    if (eligibleCount === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Eligible FDs',
+            text: 'None of the FD accounts are eligible. Please check the eligibility criteria (max 4 unique CIF IDs across all FDs).',
+            confirmButtonText: 'OK'
+        });
+        logValidationError("LOANFD", "eligible-fds", eligibleCount, "No eligible FDs found");
+        isValid = false;
+        console.log("=== LOANFD PROGRAM VALIDATION FAILED: No eligible FDs ===");
+        return isValid;
+    }
+
+    console.log("Eligible FD count: " + eligibleCount);
+    console.log("=== LOANFD PROGRAM VALIDATION PASSED ===");
+
+    return isValid;
+}
+
+// Legacy validation code - keeping for backward compatibility but won't be used
+function validateLoanFDProgram_OLD(form) {
+    var isValid = true;
+
+    console.log("=== VALIDATING LOANFD (FD) PROGRAM (OLD) ===");
+
+    // Clear previous error indicators
+    form.find('.is-invalid').removeClass('is-invalid');
+
+    // Check if at least one FD entry exists in the table
     var fdRows = form.find('.fd-table-body tr');
 
     if (fdRows.length === 0) {
