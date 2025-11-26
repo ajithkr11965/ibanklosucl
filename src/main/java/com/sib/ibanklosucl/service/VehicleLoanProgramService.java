@@ -4,6 +4,7 @@ import com.sib.ibanklosucl.dto.AnnualIncomeAndBankBalance;
 import com.sib.ibanklosucl.model.VehicleLoanBSA;
 import com.sib.ibanklosucl.model.VehicleLoanProgram;
 import com.sib.ibanklosucl.model.VehicleLoanProgramNRI;
+import com.sib.ibanklosucl.model.VehicleLoanProgramSalary;
 import com.sib.ibanklosucl.repository.VehicleLoanProgramRepository;
 import com.sib.ibanklosucl.repository.program.BSADetailsRepository;
 import com.sib.ibanklosucl.service.vlsr.FDAccountService;
@@ -131,9 +132,30 @@ public class VehicleLoanProgramService {
                 details.put("form16Flg", program.getForm16Flg());
                 details.put("vehicleLoanProgramNRIList",program.getVehicleLoanProgramNRIList());
                 details.put("vehicleLoanITRList", program.getVehicleLoanITRList());
-                details.put("vehicleLoanProgramSalaryList", program.getVehicleLoanProgramSalaryList());
                 details.put("avgSal",program.getAvgSal());
                 details.put("avgGrossSal",program.getAvgGrossSal());
+
+                // Format payslip data for resident applicants
+                if ("R".equals(program.getResidentType()) && "PAYSLIP".equals(program.getDoctype())) {
+                    if (program.getVehicleLoanProgramSalaryList() != null && !program.getVehicleLoanProgramSalaryList().isEmpty()) {
+                        List<Map<String, Object>> payslipDetails = new ArrayList<>();
+                        for (VehicleLoanProgramSalary salary : program.getVehicleLoanProgramSalaryList()) {
+                            // Only include non-deleted records
+                            if ("N".equals(salary.getDelFlg())) {
+                                Map<String, Object> payslipData = new HashMap<>();
+                                payslipData.put("payslipId", salary.getIno());
+                                payslipData.put("salMonth", salary.getSalMonth());
+                                payslipData.put("salYear", salary.getSalYear());
+                                payslipData.put("salAmount", salary.getSalAmount());
+                                payslipData.put("salGrossAmount", salary.getSalGrossAmount());
+                                payslipData.put("salaryDoc", salary.getSalaryDoc());
+                                payslipData.put("fileUploaded", salary.getSalaryDoc() != null && !salary.getSalaryDoc().isEmpty());
+                                payslipDetails.add(payslipData);
+                            }
+                        }
+                        details.put("payslipDetails", payslipDetails);
+                    }
+                }
 
                 // Add NRI remittance details if resident type is NRI
                 if ("N".equals(program.getResidentType())) {
