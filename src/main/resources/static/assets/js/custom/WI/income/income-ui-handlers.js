@@ -236,18 +236,20 @@ function updateIncomeDetails(programDetails, triggerElement) {
         }
 
         // Set document type and show relevant section
-        if (programDetails.docType) {
-            form.find('input[name="docTypeSelection"][value="' + programDetails.docType + '"]').prop('checked', true);
+        // Support both 'docType' (camelCase) and 'doctype' (lowercase) from backend
+        var documentType = programDetails.docType || programDetails.doctype;
+        if (documentType) {
+            form.find('input[name="docTypeSelection"][value="' + documentType + '"]').prop('checked', true);
 
             form.find('.itr-section, .form16-section, .payslip-section').hide();
 
-            if (programDetails.docType === 'ITR') {
+            if (documentType === 'ITR') {
                 form.find('.itr-section').show();
                 // Handle ITR-specific data if needed
                 if (programDetails.itrDetails) {
                     processITRDataForDisplay(programDetails.itrDetails, form);
                 }
-            } else if (programDetails.docType === 'FORM16') {
+            } else if (documentType === 'FORM16') {
                 form.find('.form16-section').show();
                 form.find('.form16-upd').closest('.compact-form-group').find('.text-success').remove();
                 form.find('.form16-upd').closest('.compact-form-group').append('<span class="text-success ms-2">✓ File uploaded</span>');
@@ -255,7 +257,7 @@ function updateIncomeDetails(programDetails, triggerElement) {
                     form.find('.form16-monthly-income').val(programDetails.monthlyGrossIncome);
                 }
                 // Handle Form16-specific data if needed
-            } else if (programDetails.docType === 'PAYSLIP') {
+            } else if (documentType === 'PAYSLIP') {
                 form.find('.payslip-section').show();
 
                 // Clear existing payslip rows
