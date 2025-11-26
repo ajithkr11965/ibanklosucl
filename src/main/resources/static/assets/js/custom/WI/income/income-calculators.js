@@ -56,18 +56,32 @@ function calculateTotalIncome(triggerElement) {
         triggerElement :
         triggerElement.closest('.salaried-section').find('.payslip-table-body');
     var total = 0;
+    var totalGross = 0;
 
+    // Calculate total net salary
     tableBody.find('.payslip-amount').each(function () {
         var amount = parseFloat($(this).val()) || 0;
         total += amount;
     });
 
+    // Calculate total gross salary
+    tableBody.find('.payslip-gross-amount').each(function () {
+        var grossAmount = parseFloat($(this).val()) || 0;
+        totalGross += grossAmount;
+    });
+
     // Update average monthly income (based on number of payslips)
     var rowCount = tableBody.find('tr').length;
     var avgMonthly = rowCount > 0 ? (total / rowCount).toFixed(2) : 0;
+    var avgGrossMonthly = rowCount > 0 ? (totalGross / rowCount).toFixed(2) : 0;
 
+    // Update net salary fields
     triggerElement.closest('.salaried-section').find('.total-income').val(total.toFixed(2));
     triggerElement.closest('.salaried-section').find('.avg-monthly-income').val(avgMonthly);
+
+    // Update gross salary fields
+    triggerElement.closest('.salaried-section').find('.total-gross-income').val(totalGross.toFixed(2));
+    triggerElement.closest('.salaried-section').find('.avg-gross-monthly-income').val(avgGrossMonthly);
 }
 function calculateImputedIncome(triggerElement) {
     var detElement = triggerElement.closest('.det');

@@ -327,6 +327,10 @@ $(document).ready(function () {
     $('#loanbody').on('input', '.payslip-amount', function (e) {
         calculateTotalIncome($(this));
     });
+    // Calculate total income when gross salary amount changes
+    $('#loanbody').on('input', '.payslip-gross-amount', function (e) {
+        calculateTotalIncome($(this));
+    });
     $('#loanbody').on('input', '.add-backs-obligations', function () {
         calculateFinalAMI($(this));
     });

@@ -175,6 +175,13 @@ public class ProgramSaveImp implements VlSaveService {
                             vehicleLoanProgram.setNumSalSlipFiles(bankService.getMisPRM("PRSALSLIPMON").getPVALUE());
                         }
                         break;
+                    case "avgGrossMonthlyIncome":
+                        if (vehicleLoanProgram.getLoanProgram().equals("INCOME") && (vehicleLoanProgram.getItrFlg() == null || "N".equals(vehicleLoanProgram.getItrFlg())) && ("R".equals(vehicleLoanProgram.getResidentType()))) {
+                            if (data.getValue() != null && !data.getValue().isEmpty()) {
+                                vehicleLoanProgram.setAvgGrossSal(new BigDecimal(data.getValue()));
+                            }
+                        }
+                        break;
                     case "MonthSalary":
                         if (vehicleLoanProgram.getLoanProgram().equals("INCOME") && (vehicleLoanProgram.getItrFlg() == null || "N".equals(vehicleLoanProgram.getItrFlg())) && ("N".equals(vehicleLoanProgram.getResidentType()))) {
                             if (data.getValue() != null && !data.getValue().isEmpty()) {

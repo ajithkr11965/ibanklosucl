@@ -133,6 +133,7 @@ public class VehicleLoanProgramService {
                 details.put("vehicleLoanITRList", program.getVehicleLoanITRList());
                 details.put("vehicleLoanProgramSalaryList", program.getVehicleLoanProgramSalaryList());
                 details.put("avgSal",program.getAvgSal());
+                details.put("avgGrossSal",program.getAvgGrossSal());
 
                 // Add NRI remittance details if resident type is NRI
                 if ("N".equals(program.getResidentType())) {

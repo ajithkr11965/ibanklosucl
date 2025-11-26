@@ -37,7 +37,7 @@
 	String panNo = "", ocrPanNumber = "", incomemobileNo = "", incomemobCountryCode = "", incomeDOB = "", savedPan = "", savedDob = "";
 	String appid = "", applicantype = "", liquidUploadStatus = "";
 	String applicantId = "", wiNum = "", slno = "", docType = "";
-	String hidincomeConsidered = "", hidProgramCode = "", itrFlg = "", form16Flg = "", monthlyGrossIncome = "", abbIncome = "", avgSal = "", liquidIncome = "", rtrIncome = "";
+	String hidincomeConsidered = "", hidProgramCode = "", itrFlg = "", form16Flg = "", monthlyGrossIncome = "", abbIncome = "", avgSal = "", avgGrossSal = "", liquidIncome = "", rtrIncome = "";
 
 
 	String pattern = "yyyy-MM-dd";
@@ -537,6 +537,32 @@
 													<div class="input-group">
 														<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
 														<input type="text" class="form-control avg-monthly-income" name="avgMonthlyIncome" readonly value="<%=avgSal%>">
+													</div>
+												</div>
+											</div>
+										</div>
+
+										<div class="form-divider"></div>
+
+										<div class="field-row">
+											<div class="field-group">
+												<label class="field-label">Total Gross Income:</label>
+												<div class="field-value">
+													<div class="input-group">
+														<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
+														<input type="text" class="form-control total-gross-income" name="totalGrossIncome" readonly>
+													</div>
+												</div>
+											</div>
+										</div>
+
+										<div class="field-row">
+											<div class="field-group">
+												<label class="field-label">Average Gross Monthly Income:</label>
+												<div class="field-value">
+													<div class="input-group">
+														<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
+														<input type="text" class="form-control avg-gross-monthly-income" name="avgGrossMonthlyIncome" readonly value="<%=avgGrossSal%>">
 													</div>
 												</div>
 											</div>

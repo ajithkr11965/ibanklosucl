@@ -104,6 +104,9 @@ public class VehicleLoanProgram {
     @Column(name = "AVG_SAL")
     private BigDecimal avgSal;
 
+    @Column(name = "AVG_GROSS_SAL")
+    private BigDecimal avgGrossSal;
+
     @Column(name = "ABB")
     private BigDecimal abb;
     @Column(name="DESIRED_INCOME")
