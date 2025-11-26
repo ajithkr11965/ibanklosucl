@@ -870,17 +870,39 @@ function addPayslipRowWithData(triggerElement, payslipData) {
 
     tableBody.append(rowHtml);
 
+    // Get the newly added row
+    var newRow = tableBody.find('tr').last();
+
     // Initialize select2 for the new dropdown if it's being used in your project
     if ($.fn.select2) {
-        tableBody.find('.payslip-month').last().select2({
+        var monthSelect = newRow.find('.payslip-month');
+        var yearSelect = newRow.find('.payslip-year');
+
+        monthSelect.select2({
             templateResult: formatState,
             templateSelection: formatState
         });
 
-        tableBody.find('.payslip-year').last().select2({
+        yearSelect.select2({
             templateResult: formatState,
             templateSelection: formatState
         });
+
+        // Set values after initialization using Select2's val() method
+        if (month) {
+            monthSelect.val(month.toString()).trigger('change');
+        }
+        if (year) {
+            yearSelect.val(year.toString()).trigger('change');
+        }
+    }
+
+    // Ensure input values are set programmatically
+    if (grossAmount) {
+        newRow.find('.payslip-gross-amount').val(grossAmount);
+    }
+    if (amount) {
+        newRow.find('.payslip-amount').val(amount);
     }
 }
 function deletePayslipRow(triggerElement) {
