@@ -37,7 +37,7 @@
 	String panNo = "", ocrPanNumber = "", incomemobileNo = "", incomemobCountryCode = "", incomeDOB = "", savedPan = "", savedDob = "";
 	String appid = "", applicantype = "", liquidUploadStatus = "";
 	String applicantId = "", wiNum = "", slno = "", docType = "";
-	String hidincomeConsidered = "", hidProgramCode = "", itrFlg = "", form16Flg = "", monthlyGrossIncome = "", abbIncome = "", avgSal = "", liquidIncome = "", rtrIncome = "";
+	String hidincomeConsidered = "", hidProgramCode = "", itrFlg = "", form16Flg = "", monthlyGrossIncome = "", abbIncome = "", avgSal = "", avgGrossSal = "", liquidIncome = "", rtrIncome = "";
 
 
 	String pattern = "yyyy-MM-dd";
@@ -482,35 +482,6 @@
 													</div>
 												</div>
 											</div>
-											<!-- Add Backs/Obligations Field -->
-											<div class="field-row mt-3">
-												<div class="field-group">
-													<label class="field-label">Add backs(incentive, bonus etc) / obligations (insurance, personal borrowings etc) <span
-															class="text-danger">*</span></label>
-													<div class="field-value">
-														<div class="input-group">
-															<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
-															<input type="number" class="form-control add-backs-obligations" name="addBacksObligations"
-															       placeholder="Enter positive or negative value">
-														</div>
-														<small class="text-muted">Enter positive values for add backs, negative values for obligations</small>
-													</div>
-												</div>
-											</div>
-
-											<!-- Final AMI Field -->
-											<div class="field-row mt-3">
-												<div class="field-group">
-													<label class="field-label">Final Monthly Income for Eligibility</label>
-													<div class="field-value">
-														<div class="input-group">
-															<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
-															<input type="text" class="form-control final-ami" name="finalAMI" readonly>
-														</div>
-													</div>
-												</div>
-											</div>
-
 										</div>
 									</div>
 
@@ -528,7 +499,8 @@
 														<th>Month</th>
 														<th>Year</th>
 														<th>Payslip File</th>
-														<th>Amount (<i class="ph-currency-inr fs-6"></i>)</th>
+														<th>Gross Salary (<i class="ph-currency-inr fs-6"></i>)</th>
+														<th>Net Salary (<i class="ph-currency-inr fs-6"></i>)</th>
 														<th>Action</th>
 													</tr>
 												</thead>
@@ -568,35 +540,32 @@
 													</div>
 												</div>
 											</div>
-											<!-- Add Backs/Obligations Field -->
-											<div class="field-row mt-3">
-												<div class="field-group">
-													<label class="field-label">Add backs(incentive, bonus etc) / obligations (insurance, personal borrowings etc) <span
-															class="text-danger">*</span></label>
-													<div class="field-value">
-														<div class="input-group">
-															<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
-															<input type="number" class="form-control add-backs-obligations" name="addBacksObligations"
-															       placeholder="Enter positive or negative value">
-														</div>
-														<small class="text-muted">Enter positive values for add backs, negative values for obligations</small>
+										</div>
+
+										<div class="form-divider"></div>
+
+										<div class="field-row">
+											<div class="field-group">
+												<label class="field-label">Total Gross Income:</label>
+												<div class="field-value">
+													<div class="input-group">
+														<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
+														<input type="text" class="form-control total-gross-income" name="totalGrossIncome" readonly>
 													</div>
 												</div>
 											</div>
+										</div>
 
-											<!-- Final AMI Field -->
-											<div class="field-row mt-3">
-												<div class="field-group">
-													<label class="field-label">Final Monthly Income for Eligibility</label>
-													<div class="field-value">
-														<div class="input-group">
-															<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
-															<input type="text" class="form-control final-ami" name="finalAMI" readonly>
-														</div>
+										<div class="field-row">
+											<div class="field-group">
+												<label class="field-label">Average Gross Monthly Income:</label>
+												<div class="field-value">
+													<div class="input-group">
+														<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
+														<input type="text" class="form-control avg-gross-monthly-income" name="avgGrossMonthlyIncome" readonly value="<%=avgGrossSal%>">
 													</div>
 												</div>
 											</div>
-
 										</div>
 									</div>
 									<!-- FORM16 Data capture -->
@@ -716,18 +685,6 @@
 												</div>
 											</div>
 										</div>
-										<!-- Final AMI Field -->
-										<div class="field-row mt-3">
-											<div class="field-group">
-												<label class="field-label">Final Monthly Income for Eligibility</label>
-												<div class="field-value">
-													<div class="input-group">
-														<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
-														<input type="text" class="form-control final-ami" name="finalAMI" readonly>
-													</div>
-												</div>
-											</div>
-										</div>
 									</div>
 									<div class="form-divider"></div>
 									<div class="form-divider"></div>
@@ -782,21 +739,6 @@
 												</div>
 											</div>
 										</div>
-
-
-										<!-- Final AMI Field -->
-										<div class="field-row mt-3">
-											<div class="field-group">
-												<label class="field-label">Final Monthly Income for Eligibility</label>
-												<div class="field-value">
-													<div class="input-group">
-														<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
-														<input type="text" class="form-control final-ami" name="finalAMI" readonly>
-													</div>
-												</div>
-											</div>
-										</div>
-
 									</div>
 								</div>
 							</div>
@@ -851,19 +793,6 @@
 												</div>
 											</div>
 										</div>
-										<!-- Final AMI Field -->
-										<div class="field-row mt-3">
-											<div class="field-group">
-												<label class="field-label">Final Monthly Income for Eligibility</label>
-												<div class="field-value">
-													<div class="input-group">
-														<span class="input-group-text"><i class="ph-currency-inr fs-6"></i></span>
-														<input type="text" class="form-control final-ami" name="finalAMI" readonly>
-													</div>
-												</div>
-											</div>
-										</div>
-
 									</div>
 								</div>
 							</div>

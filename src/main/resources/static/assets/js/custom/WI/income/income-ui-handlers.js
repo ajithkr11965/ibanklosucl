@@ -236,18 +236,20 @@ function updateIncomeDetails(programDetails, triggerElement) {
         }
 
         // Set document type and show relevant section
-        if (programDetails.docType) {
-            form.find('input[name="docTypeSelection"][value="' + programDetails.docType + '"]').prop('checked', true);
+        // Support both 'docType' (camelCase) and 'doctype' (lowercase) from backend
+        var documentType = programDetails.docType || programDetails.doctype;
+        if (documentType) {
+            form.find('input[name="docTypeSelection"][value="' + documentType + '"]').prop('checked', true);
 
             form.find('.itr-section, .form16-section, .payslip-section').hide();
 
-            if (programDetails.docType === 'ITR') {
+            if (documentType === 'ITR') {
                 form.find('.itr-section').show();
                 // Handle ITR-specific data if needed
                 if (programDetails.itrDetails) {
                     processITRDataForDisplay(programDetails.itrDetails, form);
                 }
-            } else if (programDetails.docType === 'FORM16') {
+            } else if (documentType === 'FORM16') {
                 form.find('.form16-section').show();
                 form.find('.form16-upd').closest('.compact-form-group').find('.text-success').remove();
                 form.find('.form16-upd').closest('.compact-form-group').append('<span class="text-success ms-2">✓ File uploaded</span>');
@@ -255,15 +257,17 @@ function updateIncomeDetails(programDetails, triggerElement) {
                     form.find('.form16-monthly-income').val(programDetails.monthlyGrossIncome);
                 }
                 // Handle Form16-specific data if needed
-            } else if (programDetails.docType === 'PAYSLIP') {
+            } else if (documentType === 'PAYSLIP') {
                 form.find('.payslip-section').show();
 
                 // Clear existing payslip rows
                 form.find('.payslip-table-body').empty();
 
                 // Add payslip rows from data
-                if (programDetails.payslipDetails && programDetails.payslipDetails.length > 0) {
-                    programDetails.payslipDetails.forEach(function (payslip) {
+                // Support both payslipDetails and vehicleLoanProgramSalaryList from backend
+                var payslipData = programDetails.payslipDetails || programDetails.vehicleLoanProgramSalaryList;
+                if (payslipData && payslipData.length > 0) {
+                    payslipData.forEach(function (payslip) {
                         addPayslipRowWithData(form, payslip);
                     });
 
@@ -768,7 +772,10 @@ function addPayslipRow(triggerElement) {
                 <input type="file" class="form-control payslip-file base64file" accept=".pdf,.jpg,.jpeg,.png" data-max-size="2097152">
             </td>
             <td>
-                <input type="number" class="form-control payslip-amount" placeholder="Income Amount">
+                <input type="number" class="form-control payslip-gross-amount" placeholder="Gross Salary">
+            </td>
+            <td>
+                <input type="number" class="form-control payslip-amount" placeholder="Net Salary">
             </td>
             <td>
                 <button type="button" class="btn btn-danger btn-sm delete-payslip-row">
@@ -802,34 +809,42 @@ function addPayslipRowWithData(triggerElement, payslipData) {
     var prevYear = currentYear - 1;
     var nextYear = currentYear + 1;
 
-    var fileUploaded = payslipData.fileUploaded || (payslipData.fileRef && payslipData.fileRef.length > 0);
+    // Support both frontend and backend property names
+    var month = payslipData.payslipMonth || payslipData.salMonth;
+    var year = payslipData.payslipYear || payslipData.salYear;
+    var amount = payslipData.payslipAmount || payslipData.salAmount;
+    var grossAmount = payslipData.payslipGrossAmount || payslipData.salGrossAmount;
+    var payslipId = payslipData.payslipId || payslipData.ino;
+    var fileRef = payslipData.fileRef || payslipData.salaryDoc;
+
+    var fileUploaded = payslipData.fileUploaded || (fileRef && fileRef.length > 0);
 
     // Create a new row with the payslip data
     var rowHtml = `
-        <tr data-payslip-id="${payslipData.payslipId || ''}">
+        <tr data-payslip-id="${payslipId || ''}">
             <td>
                 <select class="form-control payslip-month">
                     <option value="">Select Month</option>
-                    <option value="1" ${payslipData.payslipMonth === "1" ? 'selected' : ''}>January</option>
-                    <option value="2" ${payslipData.payslipMonth === "2" ? 'selected' : ''}>February</option>
-                    <option value="3" ${payslipData.payslipMonth === "3" ? 'selected' : ''}>March</option>
-                    <option value="4" ${payslipData.payslipMonth === "4" ? 'selected' : ''}>April</option>
-                    <option value="5" ${payslipData.payslipMonth === "5" ? 'selected' : ''}>May</option>
-                    <option value="6" ${payslipData.payslipMonth === "6" ? 'selected' : ''}>June</option>
-                    <option value="7" ${payslipData.payslipMonth === "7" ? 'selected' : ''}>July</option>
-                    <option value="8" ${payslipData.payslipMonth === "8" ? 'selected' : ''}>August</option>
-                    <option value="9" ${payslipData.payslipMonth === "9" ? 'selected' : ''}>September</option>
-                    <option value="10" ${payslipData.payslipMonth === "10" ? 'selected' : ''}>October</option>
-                    <option value="11" ${payslipData.payslipMonth === "11" ? 'selected' : ''}>November</option>
-                    <option value="12" ${payslipData.payslipMonth === "12" ? 'selected' : ''}>December</option>
+                    <option value="1" ${month == "1" || month == 1 ? 'selected' : ''}>January</option>
+                    <option value="2" ${month == "2" || month == 2 ? 'selected' : ''}>February</option>
+                    <option value="3" ${month == "3" || month == 3 ? 'selected' : ''}>March</option>
+                    <option value="4" ${month == "4" || month == 4 ? 'selected' : ''}>April</option>
+                    <option value="5" ${month == "5" || month == 5 ? 'selected' : ''}>May</option>
+                    <option value="6" ${month == "6" || month == 6 ? 'selected' : ''}>June</option>
+                    <option value="7" ${month == "7" || month == 7 ? 'selected' : ''}>July</option>
+                    <option value="8" ${month == "8" || month == 8 ? 'selected' : ''}>August</option>
+                    <option value="9" ${month == "9" || month == 9 ? 'selected' : ''}>September</option>
+                    <option value="10" ${month == "10" || month == 10 ? 'selected' : ''}>October</option>
+                    <option value="11" ${month == "11" || month == 11 ? 'selected' : ''}>November</option>
+                    <option value="12" ${month == "12" || month == 12 ? 'selected' : ''}>December</option>
                 </select>
             </td>
             <td>
                 <select class="form-control payslip-year">
                     <option value="">Select Year</option>
-                    <option value="${prevYear}" ${payslipData.payslipYear == prevYear ? 'selected' : ''}>${prevYear}</option>
-                    <option value="${currentYear}" ${payslipData.payslipYear == currentYear ? 'selected' : ''}>${currentYear}</option>
-                    <option value="${nextYear}" ${payslipData.payslipYear == nextYear ? 'selected' : ''}>${nextYear}</option>
+                    <option value="${prevYear}" ${year == prevYear ? 'selected' : ''}>${prevYear}</option>
+                    <option value="${currentYear}" ${year == currentYear ? 'selected' : ''}>${currentYear}</option>
+                    <option value="${nextYear}" ${year == nextYear ? 'selected' : ''}>${nextYear}</option>
                 </select>
             </td>
             <td>
@@ -840,7 +855,10 @@ function addPayslipRowWithData(triggerElement, payslipData) {
                 </div>
             </td>
             <td>
-                <input type="number" class="form-control payslip-amount" placeholder="Income Amount" value="${payslipData.payslipAmount || ''}">
+                <input type="number" class="form-control payslip-gross-amount" placeholder="Gross Salary" value="${grossAmount || ''}">
+            </td>
+            <td>
+                <input type="number" class="form-control payslip-amount" placeholder="Net Salary" value="${amount || ''}">
             </td>
             <td>
                 <button type="button" class="btn btn-danger btn-sm delete-payslip-row">
@@ -852,17 +870,39 @@ function addPayslipRowWithData(triggerElement, payslipData) {
 
     tableBody.append(rowHtml);
 
+    // Get the newly added row
+    var newRow = tableBody.find('tr').last();
+
     // Initialize select2 for the new dropdown if it's being used in your project
     if ($.fn.select2) {
-        tableBody.find('.payslip-month').last().select2({
+        var monthSelect = newRow.find('.payslip-month');
+        var yearSelect = newRow.find('.payslip-year');
+
+        monthSelect.select2({
             templateResult: formatState,
             templateSelection: formatState
         });
 
-        tableBody.find('.payslip-year').last().select2({
+        yearSelect.select2({
             templateResult: formatState,
             templateSelection: formatState
         });
+
+        // Set values after initialization using Select2's val() method
+        if (month) {
+            monthSelect.val(month.toString()).trigger('change');
+        }
+        if (year) {
+            yearSelect.val(year.toString()).trigger('change');
+        }
+    }
+
+    // Ensure input values are set programmatically
+    if (grossAmount) {
+        newRow.find('.payslip-gross-amount').val(grossAmount);
+    }
+    if (amount) {
+        newRow.find('.payslip-amount').val(amount);
     }
 }
 function deletePayslipRow(triggerElement) {

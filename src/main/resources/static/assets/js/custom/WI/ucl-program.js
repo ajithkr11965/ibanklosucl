@@ -638,6 +638,7 @@ function incomesave(form, key, callback) {
                 var row = $(this);
                 var month = row.find('.payslip-month').val();
                 var year = row.find('.payslip-year').val();
+                var grossAmount = row.find('.payslip-gross-amount').val();
                 var amount = row.find('.payslip-amount').val();
                 var payslipId = row.data('payslip-id') || '';
 
@@ -646,6 +647,9 @@ function incomesave(form, key, callback) {
                     formDataArray.push({name: "payslip-id" + index, value: payslipId});
                     formDataArray.push({name: "payslip-month" + index, value: month});
                     formDataArray.push({name: "payslip-year" + index, value: year});
+                    if (grossAmount) {
+                        formDataArray.push({name: "payslip-gross-amount" + index, value: grossAmount});
+                    }
                     formDataArray.push({name: "payslip-amount" + index, value: amount});
                     formDataArray.push({name: "payslip-uploaded" + index, value: row.find('.payslip-file-status').val() === 'uploaded' ? 'Y' : 'N'});
                 }
@@ -729,11 +733,7 @@ function incomesave(form, key, callback) {
 
             console.log("NRI remittance data transformation complete. Total rows:", remittanceData.length);
         }
-        var addBacksField = form.find('.add-backs-obligations:visible');
-        if (addBacksField.length > 0) {
-            formDataArray.push({name: "addBacksObligationsValue", value: addBacksField.val() || "0"});
-            formDataArray.push({name: "finalEligibilityAMI", value: form.find('.final-ami:visible').val() || "0"});
-        }
+        // Add backs/obligations and Final AMI have been removed - Average Monthly Income is now the final income
 
         var data = formDataArray.map(function (item) {
             return {key: item.name, value: item.value}; // Transform to key-value pair objects

@@ -49,56 +49,39 @@ function calculateRemittances(detElement) {
     }
 }
 
-function calculateFinalAMI(element) {
-    var form = element.closest('.field-row').parent();
-    var monthlyGrossField = form.find('.itr-monthly-gross, [name="itrMonthlyGross"], [name="pensionerMonthlyGross"], [name="sepSenpMonthlyGross"], [name="agriculturistMonthlyGross"], .form16-monthly-income, .avg-monthly-income');
-
-    if (monthlyGrossField.length === 0) {
-        // Try to find in previous sibling
-        monthlyGrossField = element.closest('.field-row').prev().find('.itr-monthly-gross, [name="itrMonthlyGross"], [name="pensionerMonthlyGross"], [name="sepSenpMonthlyGross"], [name="agriculturistMonthlyGross"], .form16-monthly-income, .avg-monthly-income');
-    }
-
-    if (monthlyGrossField.length === 0) {
-        console.error("Monthly gross income field not found");
-        return;
-    }
-
-    // Get the monthly gross income value
-    var monthlyGrossIncome = parseFloat(monthlyGrossField.val().replace(/,/g, '')) || 0;
-    var addBacksObligations = parseFloat(element.val()) || 0;
-
-    // Calculate final AMI
-    var finalAMI = monthlyGrossIncome + addBacksObligations;
-
-    // Find and update the final AMI field
-    var finalAMIField = form.find('.final-ami');
-    if (finalAMIField.length === 0) {
-        // Try to find in next sibling
-        finalAMIField = element.closest('.field-row').next().find('.final-ami');
-    }
-
-    if (finalAMIField.length > 0) {
-        finalAMIField.val(finalAMI.toFixed(2));
-    }
-}
+// calculateFinalAMI function has been removed as Final AMI is now equal to Average Monthly Income
 
 function calculateTotalIncome(triggerElement) {
     var tableBody = (triggerElement.is('tbody')) ?
         triggerElement :
         triggerElement.closest('.salaried-section').find('.payslip-table-body');
     var total = 0;
+    var totalGross = 0;
 
+    // Calculate total net salary
     tableBody.find('.payslip-amount').each(function () {
         var amount = parseFloat($(this).val()) || 0;
         total += amount;
     });
 
+    // Calculate total gross salary
+    tableBody.find('.payslip-gross-amount').each(function () {
+        var grossAmount = parseFloat($(this).val()) || 0;
+        totalGross += grossAmount;
+    });
+
     // Update average monthly income (based on number of payslips)
     var rowCount = tableBody.find('tr').length;
     var avgMonthly = rowCount > 0 ? (total / rowCount).toFixed(2) : 0;
+    var avgGrossMonthly = rowCount > 0 ? (totalGross / rowCount).toFixed(2) : 0;
 
+    // Update net salary fields
     triggerElement.closest('.salaried-section').find('.total-income').val(total.toFixed(2));
     triggerElement.closest('.salaried-section').find('.avg-monthly-income').val(avgMonthly);
+
+    // Update gross salary fields
+    triggerElement.closest('.salaried-section').find('.total-gross-income').val(totalGross.toFixed(2));
+    triggerElement.closest('.salaried-section').find('.avg-gross-monthly-income').val(avgGrossMonthly);
 }
 function calculateImputedIncome(triggerElement) {
     var detElement = triggerElement.closest('.det');
