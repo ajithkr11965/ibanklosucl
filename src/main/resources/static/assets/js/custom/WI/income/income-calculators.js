@@ -218,56 +218,70 @@ function calcCoverageSoFar() {
     return covered.size;
 }
 
-// Check if there are at least 12 consecutive months covered without gaps
+// Check if at least ONE bank has 12 consecutive months covered without gaps
 function hasComplete12MonthCoverage() {
     if (!statementsData || statementsData.length === 0) return false;
 
-    // Create a Set of all covered months
-    const covered = new Set();
+    // Group statements by bank code
+    const bankGroups = {};
     statementsData.forEach(s => {
-        if (!s.startDate || !s.endDate) return;
-        const [sy, sm] = s.startDate.split('-').map(Number);
-        const [ey, em] = s.endDate.split('-').map(Number);
-        let cur = new Date(sy, sm - 1, 1);
-        const end = new Date(ey, em - 1, 1);
-        while (cur <= end) {
-            const yy = cur.getFullYear();
-            let mm = cur.getMonth() + 1;
-            if (mm < 10) mm = '0' + mm;
-            covered.add(`${yy}-${mm}`);
-            cur.setMonth(cur.getMonth() + 1);
+        if (!s.startDate || !s.endDate || !s.bankCode) return;
+        if (!bankGroups[s.bankCode]) {
+            bankGroups[s.bankCode] = [];
         }
+        bankGroups[s.bankCode].push(s);
     });
 
-    if (covered.size < 12) return false;
+    // Check each bank to see if it has 12 consecutive months
+    for (const bankCode in bankGroups) {
+        const statements = bankGroups[bankCode];
 
-    // Convert to sorted array
-    const sortedMonths = Array.from(covered).sort();
-
-    // Check if there are at least 12 consecutive months
-    let consecutiveCount = 1;
-    for (let i = 1; i < sortedMonths.length; i++) {
-        const [prevY, prevM] = sortedMonths[i-1].split('-').map(Number);
-        const [currY, currM] = sortedMonths[i].split('-').map(Number);
-
-        // Check if current month is exactly 1 month after previous
-        const prevDate = new Date(prevY, prevM - 1, 1);
-        prevDate.setMonth(prevDate.getMonth() + 1);
-        const expectedY = prevDate.getFullYear();
-        const expectedM = prevDate.getMonth() + 1;
-
-        if (currY === expectedY && currM === expectedM) {
-            consecutiveCount++;
-            if (consecutiveCount >= 12) {
-                return true;
+        // Collect all months covered by this bank
+        const covered = new Set();
+        statements.forEach(s => {
+            const [sy, sm] = s.startDate.split('-').map(Number);
+            const [ey, em] = s.endDate.split('-').map(Number);
+            let cur = new Date(sy, sm - 1, 1);
+            const end = new Date(ey, em - 1, 1);
+            while (cur <= end) {
+                const yy = cur.getFullYear();
+                let mm = cur.getMonth() + 1;
+                if (mm < 10) mm = '0' + mm;
+                covered.add(`${yy}-${mm}`);
+                cur.setMonth(cur.getMonth() + 1);
             }
-        } else {
-            // Reset count if there's a gap
-            consecutiveCount = 1;
+        });
+
+        if (covered.size < 12) continue;
+
+        // Convert to sorted array
+        const sortedMonths = Array.from(covered).sort();
+
+        // Check if this bank has at least 12 consecutive months
+        let consecutiveCount = 1;
+        for (let i = 1; i < sortedMonths.length; i++) {
+            const [prevY, prevM] = sortedMonths[i-1].split('-').map(Number);
+            const [currY, currM] = sortedMonths[i].split('-').map(Number);
+
+            // Check if current month is exactly 1 month after previous
+            const prevDate = new Date(prevY, prevM - 1, 1);
+            prevDate.setMonth(prevDate.getMonth() + 1);
+            const expectedY = prevDate.getFullYear();
+            const expectedM = prevDate.getMonth() + 1;
+
+            if (currY === expectedY && currM === expectedM) {
+                consecutiveCount++;
+                if (consecutiveCount >= 12) {
+                    return true; // This bank has 12 consecutive months
+                }
+            } else {
+                // Reset count if there's a gap
+                consecutiveCount = 1;
+            }
         }
     }
 
-    return consecutiveCount >= 12;
+    return false; // No bank has 12 consecutive months
 }
 // Return inclusive month difference between YYYY-MM strings
 

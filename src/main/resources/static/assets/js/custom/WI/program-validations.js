@@ -356,19 +356,19 @@ function validateSurrogateProgram(form) {
 
     console.log("Surrogate validation mode: " + (isEditMode ? "Edit" : (isReviewMode ? "Review" : "Unknown")));
 
-    // Validate if bank statements cover at least 12 consecutive months
+    // Validate if at least ONE bank has 12 consecutive months of coverage
     var monthsCovered = parseInt(form.find('.months-covered').text());
 
-    // Check if there are at least 12 consecutive months covered
+    // Check if at least one bank has 12 consecutive months covered
     var hasCompleteCoverage = (typeof hasComplete12MonthCoverage === 'function') ? hasComplete12MonthCoverage() : (monthsCovered === 12);
 
     if (!hasCompleteCoverage) {
         if (monthsCovered < 12) {
-            alertmsg("Bank statements must cover at least 12 consecutive months. Currently covering: " + monthsCovered + " unique months.");
+            alertmsg("At least one bank must have 12 consecutive months of statements. Currently covering: " + monthsCovered + " unique months total.");
         } else {
-            alertmsg("Bank statements must cover at least 12 consecutive months without gaps. Please check your date ranges.");
+            alertmsg("At least one bank must have 12 consecutive months of statements without gaps. Please check that the statements for a single bank cover 12 consecutive months.");
         }
-        logValidationError("SURROGATE", "months-covered", monthsCovered, "Bank statements must cover at least 12 consecutive months");
+        logValidationError("SURROGATE", "months-covered", monthsCovered, "At least one bank must have 12 consecutive months");
         isValid = false;
     }
 
