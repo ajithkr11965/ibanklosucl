@@ -222,7 +222,15 @@ function calcCoverageSoFar() {
 function hasComplete12MonthCoverage() {
     if (!statementsData || statementsData.length === 0) return false;
 
-    // Group statements by bank code
+    // First, check if all statements have required data (including bankCode)
+    const incompleteStatements = statementsData.filter(s => !s.startDate || !s.endDate || !s.bankCode);
+    if (incompleteStatements.length > 0) {
+        // Some statements are missing data - validation should fail
+        // But don't return false yet, let getCoverageValidationMessage() handle the detailed error
+        console.warn(`${incompleteStatements.length} statement(s) missing required data (dates or bank selection)`);
+    }
+
+    // Group statements by bank code (only complete ones)
     const bankGroups = {};
     statementsData.forEach(s => {
         if (!s.startDate || !s.endDate || !s.bankCode) return;
@@ -231,6 +239,9 @@ function hasComplete12MonthCoverage() {
         }
         bankGroups[s.bankCode].push(s);
     });
+
+    // If no valid statements after filtering, return false
+    if (Object.keys(bankGroups).length === 0) return false;
 
     let hasValidBank = false;
 
@@ -303,6 +314,32 @@ function getCoverageValidationMessage() {
         return "No bank statements have been added.";
     }
 
+    // Check for statements with missing data
+    const missingBank = [];
+    const missingDates = [];
+
+    statementsData.forEach((s, idx) => {
+        if (!s.bankCode) {
+            missingBank.push(idx + 1); // Statement number (1-based)
+        }
+        if (!s.startDate || !s.endDate) {
+            missingDates.push(idx + 1);
+        }
+    });
+
+    // If any statements are missing required data, report that first
+    if (missingBank.length > 0 || missingDates.length > 0) {
+        const errors = [];
+        if (missingBank.length > 0) {
+            errors.push(`Statement(s) ${missingBank.join(', ')} missing bank selection`);
+        }
+        if (missingDates.length > 0) {
+            errors.push(`Statement(s) ${missingDates.join(', ')} missing start/end dates`);
+        }
+        return "Incomplete statement data:\n• " + errors.join("\n• ");
+    }
+
+    // All statements have required data, now group by bank
     const bankGroups = {};
     statementsData.forEach(s => {
         if (!s.startDate || !s.endDate || !s.bankCode) return;
