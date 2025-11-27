@@ -356,12 +356,27 @@ function validateSurrogateProgram(form) {
 
     console.log("Surrogate validation mode: " + (isEditMode ? "Edit" : (isReviewMode ? "Review" : "Unknown")));
 
-    // Validate if bank statements cover full 12 months
-    var monthsCovered = parseInt(form.find('.months-covered').text());
+    // Validate bank statement coverage using new per-bank validation logic
+    var validation = validateBankStatementCoverage();
+    var { bankValidation, hasValidBank, totalBanks } = validation;
 
-    if (monthsCovered !== 12) {
-        alertmsg("Bank statements must cover exactly 12 months. Currently covering: " + monthsCovered + " months.");
-        logValidationError("SURROGATE", "months-covered", monthsCovered, "Bank statements must cover exactly 12 months");
+    if (!hasValidBank) {
+        // Build detailed error message
+        var errorMsg = "Bank statement validation failed:\n\n";
+
+        if (totalBanks === 0) {
+            errorMsg += "• No bank statements added yet\n";
+        } else {
+            Object.keys(bankValidation).forEach(function(bankCode) {
+                var bankInfo = bankValidation[bankCode];
+                errorMsg += "• " + bankCode + ": " + bankInfo.message.replace(/✓|✗/g, '').trim() + "\n";
+            });
+
+            errorMsg += "\nRequirement: At least one bank must have exactly 12 consecutive months.";
+        }
+
+        alertmsg(errorMsg);
+        logValidationError("SURROGATE", "bank-statement-coverage", "", "No bank has exactly 12 consecutive months");
         isValid = false;
     }
 
@@ -376,12 +391,16 @@ function validateSurrogateProgram(form) {
 
     // Validate statements data from the global statementsData array
     if (typeof statementsData !== 'undefined' && statementsData.length > 0) {
+        var missingBankStatements = [];
+
         // Validate each statement has a bank selected
         for (var i = 0; i < statementsData.length; i++) {
             var statement = statementsData[i];
+
             if (!statement.bankCode) {
                 var bankSelect = form.find(`.bank-select[data-idx="${i}"]`);
                 bankSelect.addClass('is-invalid');
+                missingBankStatements.push(i + 1);
                 logValidationError("SURROGATE", `bank-code-${i + 1}`, "", `Bank not selected for statement ${i + 1}`);
                 isValid = false;
             }
@@ -401,6 +420,11 @@ function validateSurrogateProgram(form) {
                 logValidationError("SURROGATE", `statement-${i + 1}-uploaded`, "false", `Statement ${i + 1} is not uploaded`);
                 isValid = false;
             }
+        }
+
+        // Show detailed error message for missing bank selections
+        if (missingBankStatements.length > 0) {
+            alertmsg("Please select a bank for statement(s): " + missingBankStatements.join(", "));
         }
     }
 

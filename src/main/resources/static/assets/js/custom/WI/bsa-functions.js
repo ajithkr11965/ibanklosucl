@@ -285,33 +285,47 @@ function checkLatestCompletedBSATransactionStatusSurrogate(triggerElement, viewT
         applicantId: applicantId,
         statementType: statementType
     };
-    showLoader();
+
     $.ajax({
         url: "process/getLatestCompletedBSATransactionId",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(jsonBody),
         success: function (latestCompletedTransactionId) {
-            if (latestCompletedTransactionId !== null || latestCompletedTransactionId !== "") {
+            if (latestCompletedTransactionId !== null && latestCompletedTransactionId !== "") {
                 console.log("LATEST BSA IS ---" + latestCompletedTransactionId);
-                showLoader();
+
                 if (viewType === "SUMMARY") {
                     fetchBSASummary(latestCompletedTransactionId, applicantId, wiNum, triggerElement, statementType);
                 } else {
                     fetchBSAReport(latestCompletedTransactionId, applicantId, wiNum, triggerElement, statementType, modal);
                 }
-                hideLoader();
             } else {
-                notyaltInfo("BSA Processing not completed");
+                // Hide analyzing overlay if no completed transaction found
+                if (modal && modal.data('analyzingOverlay')) {
+                    hideLoadingAnimation(modal.data('analyzingOverlay'));
+                    modal.data('analyzingOverlay', null);
+                }
+
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Processing Not Complete',
+                    text: 'Bank statement analysis is still in progress. Please wait a moment and try again.',
+                    confirmButtonText: 'OK'
+                });
             }
         },
         error: function (xhr, status, error) {
-            hideLoader();
+            // Hide analyzing overlay on error
+            if (modal && modal.data('analyzingOverlay')) {
+                hideLoadingAnimation(modal.data('analyzingOverlay'));
+                modal.data('analyzingOverlay', null);
+            }
+
             alertmsg("Error retrieving the latest completed transaction ID. Please try again later.");
             console.error("Error retrieving the latest completed transaction ID:", status, error);
         }
     });
-    hideLoader();
 }
 
 function fetchBSAReport(perfiosTransactionId, applicantId, wiNum, triggerElement, statementType, modal) {
@@ -321,9 +335,19 @@ function fetchBSAReport(perfiosTransactionId, applicantId, wiNum, triggerElement
         applicantId: applicantId,
         wiNum: wiNum
     };
-    showLoader();
+
     const bsaResponseElement = triggerElement.closest('.det').find('[data-response-type="' + statementType + '"]');
-    const loadingOverlay = showLoadingAnimation(bsaResponseElement[0]);
+
+    // Check if there's already an analyzing overlay from closemodalSurrogate
+    let analyzingOverlay = null;
+    if (modal && modal.data('analyzingOverlay')) {
+        analyzingOverlay = modal.data('analyzingOverlay');
+    } else {
+        // If no analyzing overlay exists, create a loading overlay
+        showLoader();
+        analyzingOverlay = showLoadingAnimation(bsaResponseElement[0]);
+    }
+
     $.ajax({
         url: "process/fetchBSAReport",
         type: "POST",
@@ -380,30 +404,69 @@ function fetchBSAReport(perfiosTransactionId, applicantId, wiNum, triggerElement
                     `).join('')}
                 </table>
             `);
-                hideLoadingAnimation(loadingOverlay);
+
+                // Hide the analyzing/loading overlay
+                if (analyzingOverlay) {
+                    hideLoadingAnimation(analyzingOverlay);
+                }
+
                 bsaResponseElement.show();
                 triggerElement.closest('.det').find('[data-response-type="' + statementType + '"]').parent().next().find('input[name^="abbAmount"]').val(abbAmount.toFixed(2));
-                //triggerElement.closest('.det').find('[data-response-type="' + statementType + '"]').find('input[name^="bsaABB"]').val(abbAmount.toFixed(2));
+
                 var programBtn = triggerElement.closest('.det').find('.save-button-program');
                 programBtn.prop("disabled", false);
-                var statementIndex = modal.data('statementIndex');
-                var modalTitle = modal.find('.modal-title').text();
-                console.log(modalTitle + "---AHL-PROGRAM---" + statementType + "--------------" + statementIndex);
-                statementsData[statementIndex].uploaded = true;
-                $(triggerElement).closest('.det').find(`#upload-status-${statementIndex}`).html('<span class="text-success">Uploaded</span>');
-                $(triggerElement).closest('.det').find(`.review-upload-btn[data-idx="${statementIndex}"]`).prop('disabled', true);
-                var allUploaded = statementsData.every(s => s.uploaded);
-                triggerElement.closest('.det').find('.review-selections-btn').prop('disabled', !allUploaded);
+
+                if (modal) {
+                    var statementIndex = modal.data('statementIndex');
+                    var modalTitle = modal.find('.modal-title').text();
+                    console.log(modalTitle + "---AHL-PROGRAM---" + statementType + "--------------" + statementIndex);
+
+                    if (typeof statementsData !== 'undefined' && statementsData[statementIndex]) {
+                        statementsData[statementIndex].uploaded = true;
+                        $(triggerElement).closest('.det').find(`#upload-status-${statementIndex}`).html('<span class="text-success">Uploaded</span>');
+                        $(triggerElement).closest('.det').find(`.review-upload-btn[data-idx="${statementIndex}"]`).prop('disabled', true);
+
+                        var allUploaded = statementsData.every(s => s.uploaded);
+                        triggerElement.closest('.det').find('.review-selections-btn').prop('disabled', !allUploaded);
+                    }
+
+                    // Clear the modal data
+                    modal.data('analyzingOverlay', null);
+                }
+
+                // Show success notification
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Analysis Complete',
+                    text: 'Bank statement has been analyzed successfully.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
             } else {
+                // Hide overlay on error
+                if (analyzingOverlay) {
+                    hideLoadingAnimation(analyzingOverlay);
+                }
                 alertmsg("Error fetching report. Please try again later.");
             }
             hideLoader();
         },
         error: function (xhr, status, error) {
             hideLoader();
-            hideLoadingAnimation(loadingOverlay);
+            // Hide overlay on error
+            if (analyzingOverlay) {
+                hideLoadingAnimation(analyzingOverlay);
+            }
             alertmsg("Error fetching report. Please try again later.");
             console.error("Error fetching report:", status, error);
+
+            // Clear modal data if it exists
+            if (modal) {
+                modal.data('analyzingOverlay', null);
+            }
         }
     });
 }
@@ -576,7 +639,7 @@ function closemodal(modalTitle, triggerElement) {
 
 function closemodalSurrogate(modalTitle, triggerElement, modal) {
     console.log("close called" + modalTitle);
-    showLoader();
+
     let statementType = null;
     if (modalTitle.includes("Surrogate")) { // modal closed from surrogate program
         if (modalTitle.includes("Statement 1")) {
@@ -587,13 +650,112 @@ function closemodalSurrogate(modalTitle, triggerElement, modal) {
             statementType = "SURROGATE-3";
         }
     }
+
     if (modalTitle.includes("Bank Statement Upload") || modalTitle.includes("Surrogate Statement Upload")) {
         console.log("BSA validity check called for:", statementType);
+
         if (statementType.includes("SURROGATE")) {
+            // Show analyzing loader on the specific statement's response element
+            const bsaResponseElement = triggerElement.closest('.det').find('[data-response-type="' + statementType + '"]');
+
+            if (bsaResponseElement.length > 0) {
+                // Create and show analyzing loader
+                const analyzingOverlay = showAnalyzingLoader(bsaResponseElement[0], statementType);
+
+                // Store the overlay reference in modal data for cleanup if needed
+                modal.data('analyzingOverlay', analyzingOverlay);
+            }
+
+            // Call the status check and fetch report
             checkLatestCompletedBSATransactionStatusSurrogate(triggerElement, "DETAIL", statementType, modal);
         }
-        hideLoader();
     }
+}
+
+// Custom loader for bank statement analysis
+function showAnalyzingLoader(element, statementType) {
+    // Remove any existing loader first
+    const existingLoader = element.querySelector('.analyzing-overlay');
+    if (existingLoader) {
+        existingLoader.remove();
+    }
+
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.classList.add('analyzing-overlay', 'loading-overlay');
+    overlay.style.position = 'absolute';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.minHeight = '200px';
+    overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '1000';
+    overlay.style.borderRadius = '8px';
+    overlay.style.padding = '20px';
+
+    // Create spinner container
+    const spinnerContainer = document.createElement('div');
+    spinnerContainer.style.textAlign = 'center';
+
+    // Create spinner
+    const spinner = document.createElement('div');
+    spinner.classList.add('spinner-border', 'text-primary');
+    spinner.style.width = '3rem';
+    spinner.style.height = '3rem';
+    spinner.setAttribute('role', 'status');
+
+    // Create loading text
+    const loadingTitle = document.createElement('h5');
+    loadingTitle.className = 'mt-3 mb-2 text-primary';
+    loadingTitle.innerHTML = '<i class="ph-file-arrow-up me-2"></i>Analyzing Bank Statement';
+
+    const loadingSubtext = document.createElement('p');
+    loadingSubtext.className = 'text-muted mb-0';
+    loadingSubtext.textContent = 'Please wait while we process your bank statement...';
+
+    // Animated dots for processing effect
+    const dots = document.createElement('div');
+    dots.className = 'mt-2';
+    dots.innerHTML = '<span class="analyzing-dots">Processing<span>.</span><span>.</span><span>.</span></span>';
+
+    // Add pulsing animation style
+    const style = document.createElement('style');
+    style.textContent = `
+        .analyzing-dots span {
+            animation: blink 1.4s infinite both;
+        }
+        .analyzing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .analyzing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        .analyzing-dots span:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Append elements
+    spinnerContainer.appendChild(spinner);
+    spinnerContainer.appendChild(loadingTitle);
+    spinnerContainer.appendChild(loadingSubtext);
+    spinnerContainer.appendChild(dots);
+    overlay.appendChild(spinnerContainer);
+
+    // Add overlay to the element
+    element.style.position = 'relative';
+    element.appendChild(overlay);
+
+    return overlay;
 }
 
 // Validate BSA Date Range
