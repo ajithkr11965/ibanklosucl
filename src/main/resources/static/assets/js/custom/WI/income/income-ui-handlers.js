@@ -398,6 +398,23 @@ function updateSurrogateDetails(programDetails, detElement) {
     // Update the coverage UI
     updateCoverageUI(detElement);
 }
+// Helper function to get bank name from bank code
+function getBankNameFromCode(bankCode) {
+    // Find the bank select dropdown (any instance will have the same options)
+    const bankSelect = $('.bank-select').first();
+
+    if (bankSelect.length > 0) {
+        // Find the option with matching value
+        const option = bankSelect.find(`option[value="${bankCode}"]`);
+        if (option.length > 0) {
+            return option.text();
+        }
+    }
+
+    // Fallback to bank code if name not found
+    return bankCode;
+}
+
 function updateCoverageUI(detElement) {
     // Use the new per-bank validation logic
     const validation = validateBankStatementCoverage();
@@ -420,6 +437,7 @@ function updateCoverageUI(detElement) {
 
         Object.keys(bankValidation).forEach(bankCode => {
             const bankInfo = bankValidation[bankCode];
+            const bankName = getBankNameFromCode(bankCode);
             let badgeClass = 'bg-success';
             let iconClass = 'ph-check-circle';
 
@@ -442,7 +460,7 @@ function updateCoverageUI(detElement) {
 
             detailedMessage += `
                 <div class="d-flex align-items-center mb-2 p-2 border rounded ${bankInfo.status === 'valid' ? 'border-success bg-success-subtle' : 'border-warning bg-warning-subtle'}">
-                    <span class="badge ${badgeClass} me-2"><i class="${iconClass} me-1"></i>${bankCode}</span>
+                    <span class="badge ${badgeClass} me-2"><i class="${iconClass} me-1"></i>${bankName}</span>
                     <span class="flex-grow-1">${bankInfo.message}</span>
                 </div>
             `;
