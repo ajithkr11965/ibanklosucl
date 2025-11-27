@@ -217,6 +217,58 @@ function calcCoverageSoFar() {
     });
     return covered.size;
 }
+
+// Check if there are at least 12 consecutive months covered without gaps
+function hasComplete12MonthCoverage() {
+    if (!statementsData || statementsData.length === 0) return false;
+
+    // Create a Set of all covered months
+    const covered = new Set();
+    statementsData.forEach(s => {
+        if (!s.startDate || !s.endDate) return;
+        const [sy, sm] = s.startDate.split('-').map(Number);
+        const [ey, em] = s.endDate.split('-').map(Number);
+        let cur = new Date(sy, sm - 1, 1);
+        const end = new Date(ey, em - 1, 1);
+        while (cur <= end) {
+            const yy = cur.getFullYear();
+            let mm = cur.getMonth() + 1;
+            if (mm < 10) mm = '0' + mm;
+            covered.add(`${yy}-${mm}`);
+            cur.setMonth(cur.getMonth() + 1);
+        }
+    });
+
+    if (covered.size < 12) return false;
+
+    // Convert to sorted array
+    const sortedMonths = Array.from(covered).sort();
+
+    // Check if there are at least 12 consecutive months
+    let consecutiveCount = 1;
+    for (let i = 1; i < sortedMonths.length; i++) {
+        const [prevY, prevM] = sortedMonths[i-1].split('-').map(Number);
+        const [currY, currM] = sortedMonths[i].split('-').map(Number);
+
+        // Check if current month is exactly 1 month after previous
+        const prevDate = new Date(prevY, prevM - 1, 1);
+        prevDate.setMonth(prevDate.getMonth() + 1);
+        const expectedY = prevDate.getFullYear();
+        const expectedM = prevDate.getMonth() + 1;
+
+        if (currY === expectedY && currM === expectedM) {
+            consecutiveCount++;
+            if (consecutiveCount >= 12) {
+                return true;
+            }
+        } else {
+            // Reset count if there's a gap
+            consecutiveCount = 1;
+        }
+    }
+
+    return consecutiveCount >= 12;
+}
 // Return inclusive month difference between YYYY-MM strings
 
 function monthDiffInclusive(start, end) {

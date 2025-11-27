@@ -402,7 +402,11 @@ function updateCoverageUI(detElement) {
     const total = calcCoverageSoFar();
     // detElement.closest('.det').find('.months-covered')
     detElement.closest('.det').find('.months-covered').text(total);
-    if (total === 12) {
+
+    // Check if there are at least 12 consecutive months covered
+    const hasCompleteCoverage = hasComplete12MonthCoverage();
+
+    if (hasCompleteCoverage) {
         detElement.closest('.det').find('.coverage-status').removeClass('coverage-incomplete');
         detElement.closest('.det').find('.coverage-status').addClass('coverage-complete');
         detElement.closest('.det').find('.coverage-status').text('(complete)');
@@ -422,8 +426,8 @@ function updateCoverageUI(detElement) {
 
     // All bank codes chosen?
     let nonEmptyBank = statementsData.every(s => s.bankCode);
-    // Exactly 12 months coverage?
-    const coverageOk = (total === 12);
+    // At least 12 consecutive months coverage?
+    const coverageOk = hasCompleteCoverage;
     // Must be 1..3 statements
     let canReview = coverageOk && nonEmptyBank &&
         (statementsData.length >= 1 && statementsData.length <= 3);
