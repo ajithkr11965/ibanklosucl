@@ -218,7 +218,7 @@ function calcCoverageSoFar() {
     return covered.size;
 }
 
-// Check if at least ONE bank has 12 consecutive months covered without gaps
+// Check if at least ONE bank has exactly 12 consecutive months (not more, not less)
 function hasComplete12MonthCoverage() {
     if (!statementsData || statementsData.length === 0) return false;
 
@@ -232,7 +232,9 @@ function hasComplete12MonthCoverage() {
         bankGroups[s.bankCode].push(s);
     });
 
-    // Check each bank to see if it has 12 consecutive months
+    let hasValidBank = false;
+
+    // Check each bank to see if it has exactly 12 consecutive months
     for (const bankCode in bankGroups) {
         const statements = bankGroups[bankCode];
 
@@ -252,13 +254,21 @@ function hasComplete12MonthCoverage() {
             }
         });
 
+        // Skip if less than 12 months
         if (covered.size < 12) continue;
+
+        // Reject if more than 12 unique months (affects ABB calculation)
+        if (covered.size > 12) {
+            console.warn(`Bank ${bankCode} has ${covered.size} unique months (more than 12 allowed)`);
+            continue;
+        }
 
         // Convert to sorted array
         const sortedMonths = Array.from(covered).sort();
 
-        // Check if this bank has at least 12 consecutive months
+        // Check if this bank has exactly 12 consecutive months without gaps
         let consecutiveCount = 1;
+        let hasGap = false;
         for (let i = 1; i < sortedMonths.length; i++) {
             const [prevY, prevM] = sortedMonths[i-1].split('-').map(Number);
             const [currY, currM] = sortedMonths[i].split('-').map(Number);
@@ -271,17 +281,94 @@ function hasComplete12MonthCoverage() {
 
             if (currY === expectedY && currM === expectedM) {
                 consecutiveCount++;
-                if (consecutiveCount >= 12) {
-                    return true; // This bank has 12 consecutive months
-                }
             } else {
-                // Reset count if there's a gap
-                consecutiveCount = 1;
+                hasGap = true;
+                break;
             }
+        }
+
+        // This bank is valid if it has exactly 12 consecutive months with no gaps
+        if (covered.size === 12 && consecutiveCount === 12 && !hasGap) {
+            hasValidBank = true;
+            break; // Found at least one valid bank
         }
     }
 
-    return false; // No bank has 12 consecutive months
+    return hasValidBank;
+}
+
+// Get validation details for user-friendly error messages
+function getCoverageValidationMessage() {
+    if (!statementsData || statementsData.length === 0) {
+        return "No bank statements have been added.";
+    }
+
+    const bankGroups = {};
+    statementsData.forEach(s => {
+        if (!s.startDate || !s.endDate || !s.bankCode) return;
+        if (!bankGroups[s.bankCode]) {
+            bankGroups[s.bankCode] = [];
+        }
+        bankGroups[s.bankCode].push(s);
+    });
+
+    const bankDetails = [];
+    for (const bankCode in bankGroups) {
+        const statements = bankGroups[bankCode];
+        const covered = new Set();
+        statements.forEach(s => {
+            const [sy, sm] = s.startDate.split('-').map(Number);
+            const [ey, em] = s.endDate.split('-').map(Number);
+            let cur = new Date(sy, sm - 1, 1);
+            const end = new Date(ey, em - 1, 1);
+            while (cur <= end) {
+                const yy = cur.getFullYear();
+                let mm = cur.getMonth() + 1;
+                if (mm < 10) mm = '0' + mm;
+                covered.add(`${yy}-${mm}`);
+                cur.setMonth(cur.getMonth() + 1);
+            }
+        });
+
+        const sortedMonths = Array.from(covered).sort();
+        let hasGap = false;
+        for (let i = 1; i < sortedMonths.length; i++) {
+            const [prevY, prevM] = sortedMonths[i-1].split('-').map(Number);
+            const [currY, currM] = sortedMonths[i].split('-').map(Number);
+            const prevDate = new Date(prevY, prevM - 1, 1);
+            prevDate.setMonth(prevDate.getMonth() + 1);
+            const expectedY = prevDate.getFullYear();
+            const expectedM = prevDate.getMonth() + 1;
+            if (currY !== expectedY || currM !== expectedM) {
+                hasGap = true;
+                break;
+            }
+        }
+
+        bankDetails.push({
+            bankCode: bankCode,
+            monthCount: covered.size,
+            hasGap: hasGap
+        });
+    }
+
+    // Generate specific error message
+    const invalidBanks = bankDetails.filter(b => b.monthCount !== 12 || b.hasGap);
+    if (invalidBanks.length === bankDetails.length) {
+        // All banks are invalid
+        const messages = invalidBanks.map(b => {
+            if (b.monthCount < 12) {
+                return `Bank ${b.bankCode}: Only ${b.monthCount} months (needs 12)`;
+            } else if (b.monthCount > 12) {
+                return `Bank ${b.bankCode}: ${b.monthCount} months (exceeds 12, affects ABB calculation)`;
+            } else if (b.hasGap) {
+                return `Bank ${b.bankCode}: Has gaps in coverage`;
+            }
+        });
+        return "No bank has exactly 12 consecutive months:\n• " + messages.join("\n• ");
+    }
+
+    return "Validation passed";
 }
 // Return inclusive month difference between YYYY-MM strings
 

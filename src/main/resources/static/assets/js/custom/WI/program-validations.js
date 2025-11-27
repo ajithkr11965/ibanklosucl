@@ -356,19 +356,18 @@ function validateSurrogateProgram(form) {
 
     console.log("Surrogate validation mode: " + (isEditMode ? "Edit" : (isReviewMode ? "Review" : "Unknown")));
 
-    // Validate if at least ONE bank has 12 consecutive months of coverage
+    // Validate if at least ONE bank has exactly 12 consecutive months of coverage
     var monthsCovered = parseInt(form.find('.months-covered').text());
 
-    // Check if at least one bank has 12 consecutive months covered
+    // Check if at least one bank has exactly 12 consecutive months covered
     var hasCompleteCoverage = (typeof hasComplete12MonthCoverage === 'function') ? hasComplete12MonthCoverage() : (monthsCovered === 12);
 
     if (!hasCompleteCoverage) {
-        if (monthsCovered < 12) {
-            alertmsg("At least one bank must have 12 consecutive months of statements. Currently covering: " + monthsCovered + " unique months total.");
-        } else {
-            alertmsg("At least one bank must have 12 consecutive months of statements without gaps. Please check that the statements for a single bank cover 12 consecutive months.");
-        }
-        logValidationError("SURROGATE", "months-covered", monthsCovered, "At least one bank must have 12 consecutive months");
+        // Get detailed validation message
+        var detailedMessage = (typeof getCoverageValidationMessage === 'function') ? getCoverageValidationMessage() : "At least one bank must have exactly 12 consecutive months.";
+
+        alertmsg("Validation Failed:\n\n" + detailedMessage + "\n\nNote: Each bank must have exactly 12 consecutive months (not more, not less) to ensure accurate ABB calculation.");
+        logValidationError("SURROGATE", "months-covered", monthsCovered, "At least one bank must have exactly 12 consecutive months");
         isValid = false;
     }
 
