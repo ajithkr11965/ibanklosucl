@@ -198,7 +198,7 @@ function generateDummyImputedIncomeResponse() {
         status: 'SUCCESS'
     };
 }
-// Coverage after all currently valid statements
+// Coverage after all currently valid statements (LEGACY - for backward compatibility)
 function calcCoverageSoFar() {
     const covered = new Set();
     statementsData.forEach(s => {
@@ -216,6 +216,129 @@ function calcCoverageSoFar() {
         }
     });
     return covered.size;
+}
+
+/**
+ * NEW PER-BANK VALIDATION LOGIC
+ * Validates that at least one bank has exactly 12 consecutive months
+ * Returns detailed validation results per bank
+ */
+function validateBankStatementCoverage() {
+    // Group statements by bank
+    const bankStatements = {};
+
+    statementsData.forEach((stmt, idx) => {
+        // Skip statements without required data
+        if (!stmt.startDate || !stmt.endDate || !stmt.bankCode) {
+            return;
+        }
+
+        if (!bankStatements[stmt.bankCode]) {
+            bankStatements[stmt.bankCode] = [];
+        }
+
+        bankStatements[stmt.bankCode].push({
+            index: idx,
+            startDate: stmt.startDate,
+            endDate: stmt.endDate,
+            startDisplay: stmt.startDisplay,
+            endDisplay: stmt.endDisplay
+        });
+    });
+
+    // Validate each bank
+    const bankValidation = {};
+    let hasValidBank = false;
+
+    Object.keys(bankStatements).forEach(bankCode => {
+        const statements = bankStatements[bankCode];
+
+        // Sort statements by start date
+        statements.sort((a, b) => {
+            const dateA = new Date(a.startDate);
+            const dateB = new Date(b.startDate);
+            return dateA - dateB;
+        });
+
+        // Collect all months covered by this bank
+        const monthsCovered = new Set();
+        statements.forEach(stmt => {
+            const [sy, sm] = stmt.startDate.split('-').map(Number);
+            const [ey, em] = stmt.endDate.split('-').map(Number);
+            let cur = new Date(sy, sm - 1, 1);
+            const end = new Date(ey, em - 1, 1);
+
+            while (cur <= end) {
+                const yy = cur.getFullYear();
+                let mm = cur.getMonth() + 1;
+                if (mm < 10) mm = '0' + mm;
+                monthsCovered.add(`${yy}-${mm}`);
+                cur.setMonth(cur.getMonth() + 1);
+            }
+        });
+
+        const totalMonths = monthsCovered.size;
+
+        // Check if months are consecutive
+        let isConsecutive = false;
+        let hasGaps = false;
+
+        if (totalMonths > 0) {
+            // Convert to sorted array
+            const monthsArray = Array.from(monthsCovered).sort();
+
+            // Check consecutiveness
+            isConsecutive = true;
+            for (let i = 1; i < monthsArray.length; i++) {
+                const [prevYear, prevMonth] = monthsArray[i - 1].split('-').map(Number);
+                const [currYear, currMonth] = monthsArray[i].split('-').map(Number);
+
+                const prevDate = new Date(prevYear, prevMonth - 1, 1);
+                const currDate = new Date(currYear, currMonth - 1, 1);
+                const expectedNext = new Date(prevYear, prevMonth, 1); // Next month after prev
+
+                if (currDate.getTime() !== expectedNext.getTime()) {
+                    isConsecutive = false;
+                    hasGaps = true;
+                    break;
+                }
+            }
+        }
+
+        // Determine validation status
+        let status = 'invalid';
+        let message = '';
+
+        if (totalMonths === 12 && isConsecutive) {
+            status = 'valid';
+            message = '✓ Valid: 12 consecutive months';
+            hasValidBank = true;
+        } else if (totalMonths < 12) {
+            status = 'incomplete';
+            message = `✗ Incomplete: Only ${totalMonths} month(s), need 12`;
+        } else if (totalMonths > 12) {
+            status = 'excess';
+            message = `✗ Excess: ${totalMonths} months, need exactly 12 (affects ABB calculation)`;
+        } else if (hasGaps) {
+            status = 'gaps';
+            message = `✗ Has gaps: ${totalMonths} months but not consecutive`;
+        }
+
+        bankValidation[bankCode] = {
+            totalMonths: totalMonths,
+            isConsecutive: isConsecutive,
+            hasGaps: hasGaps,
+            status: status,
+            message: message,
+            statements: statements
+        };
+    });
+
+    return {
+        bankValidation: bankValidation,
+        hasValidBank: hasValidBank,
+        totalBanks: Object.keys(bankStatements).length
+    };
 }
 // Return inclusive month difference between YYYY-MM strings
 

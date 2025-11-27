@@ -399,35 +399,100 @@ function updateSurrogateDetails(programDetails, detElement) {
     updateCoverageUI(detElement);
 }
 function updateCoverageUI(detElement) {
+    // Use the new per-bank validation logic
+    const validation = validateBankStatementCoverage();
+    const { bankValidation, hasValidBank, totalBanks } = validation;
+
+    // For backward compatibility, still show total months covered (legacy)
     const total = calcCoverageSoFar();
-    // detElement.closest('.det').find('.months-covered')
     detElement.closest('.det').find('.months-covered').text(total);
-    if (total === 12) {
+
+    // Build detailed per-bank coverage message
+    let detailedMessage = '';
+    let hasErrors = false;
+
+    if (totalBanks === 0) {
+        detailedMessage = '<div class="alert alert-warning mb-2"><i class="ph-warning me-2"></i>No bank statements added yet</div>';
+        hasErrors = true;
+    } else {
+        // Show per-bank validation results
+        detailedMessage = '<div class="bank-coverage-details mt-2">';
+
+        Object.keys(bankValidation).forEach(bankCode => {
+            const bankInfo = bankValidation[bankCode];
+            let badgeClass = 'bg-success';
+            let iconClass = 'ph-check-circle';
+
+            if (bankInfo.status === 'valid') {
+                badgeClass = 'bg-success';
+                iconClass = 'ph-check-circle';
+            } else if (bankInfo.status === 'incomplete') {
+                badgeClass = 'bg-warning';
+                iconClass = 'ph-warning';
+                hasErrors = true;
+            } else if (bankInfo.status === 'excess') {
+                badgeClass = 'bg-danger';
+                iconClass = 'ph-x-circle';
+                hasErrors = true;
+            } else if (bankInfo.status === 'gaps') {
+                badgeClass = 'bg-danger';
+                iconClass = 'ph-x-circle';
+                hasErrors = true;
+            }
+
+            detailedMessage += `
+                <div class="d-flex align-items-center mb-2 p-2 border rounded ${bankInfo.status === 'valid' ? 'border-success bg-success-subtle' : 'border-warning bg-warning-subtle'}">
+                    <span class="badge ${badgeClass} me-2"><i class="${iconClass} me-1"></i>${bankCode}</span>
+                    <span class="flex-grow-1">${bankInfo.message}</span>
+                </div>
+            `;
+        });
+
+        detailedMessage += '</div>';
+
+        // Add overall status message
+        if (hasValidBank) {
+            detailedMessage = '<div class="alert alert-success mb-2"><i class="ph-check-circle me-2"></i><strong>Valid:</strong> At least one bank has exactly 12 consecutive months</div>' + detailedMessage;
+        } else {
+            detailedMessage = '<div class="alert alert-danger mb-2"><i class="ph-x-circle me-2"></i><strong>Invalid:</strong> No bank has exactly 12 consecutive months</div>' + detailedMessage;
+        }
+    }
+
+    // Update the coverage status in the UI
+    const coverageDetailsContainer = detElement.closest('.det').find('.coverage-details-container');
+    if (coverageDetailsContainer.length > 0) {
+        coverageDetailsContainer.html(detailedMessage);
+    } else {
+        // Fallback: Create the container if it doesn't exist
+        const coverageStatusElement = detElement.closest('.det').find('.coverage-status');
+        if (coverageStatusElement.length > 0) {
+            // Insert detailed message after coverage status
+            if (coverageStatusElement.next('.coverage-details-container').length === 0) {
+                coverageStatusElement.after('<div class="coverage-details-container mt-2"></div>');
+            }
+            detElement.closest('.det').find('.coverage-details-container').html(detailedMessage);
+        }
+    }
+
+    // Update main coverage status (for backward compatibility)
+    if (hasValidBank) {
         detElement.closest('.det').find('.coverage-status').removeClass('coverage-incomplete');
         detElement.closest('.det').find('.coverage-status').addClass('coverage-complete');
         detElement.closest('.det').find('.coverage-status').text('(complete)');
-        // $('#coverage-status')
-        //   .removeClass('coverage-incomplete')
-        //   .addClass('coverage-complete')
-        //   .text('(complete)');
     } else {
         detElement.closest('.det').find('.coverage-status').removeClass('coverage-complete');
         detElement.closest('.det').find('.coverage-status').addClass('coverage-incomplete');
         detElement.closest('.det').find('.coverage-status').text('(incomplete)');
-        // $('#coverage-status')
-        //   .removeClass('coverage-complete')
-        //   .addClass('coverage-incomplete')
-        //   .text('(incomplete)');
     }
 
     // All bank codes chosen?
     let nonEmptyBank = statementsData.every(s => s.bankCode);
-    // Exactly 12 months coverage?
-    const coverageOk = (total === 12);
+    // Must have at least one valid bank with exactly 12 consecutive months
+    const coverageOk = hasValidBank;
     // Must be 1..3 statements
     let canReview = coverageOk && nonEmptyBank &&
         (statementsData.length >= 1 && statementsData.length <= 3);
-    // $('#review-selections-btn').prop('disabled', !canReview);
+
     detElement.closest('.det').find('.review-selections-btn').prop('disabled', !canReview);
 }
 function renderStatements(detElement) {
